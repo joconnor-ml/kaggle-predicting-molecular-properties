@@ -88,7 +88,7 @@ def process_multiple(data_file, structure_dir, output_dir):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_features.npy"), edge_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.atom_features.npy"), atom_features)
-        np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), targets)
+        np.save(os.path.join(output_dir, f"{molecule_name}.targets.npy"), targets)
 
 
 if __name__ == "__main__":

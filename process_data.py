@@ -81,14 +81,18 @@ def process_multiple(data_file, structure_dir, output_dir):
     grps = train.groupby("molecule_name")
     targets = [grps.get_group(molecule_name)["scalar_coupling_constant"].values
                for molecule_name in molecule_names]
+    target_indices = [grps.get_group(molecule_name)[["atom_index_0", "atom_index_1"]].values.T
+                      for molecule_name in molecule_names]
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     results = pool.map(structure_to_graph, structure_files)
 
-    for (edge_array, edge_features, atom_features), targets, molecule_name in zip(results, targets, molecule_names):
+    for (edge_array, edge_features, atom_features), targets, target_indices, molecule_name in \
+            zip(results, targets, target_indices, molecule_names):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_features.npy"), edge_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.atom_features.npy"), atom_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.targets.npy"), targets)
+        np.save(os.path.join(output_dir, f"{molecule_name}.target_indices.npy"), target_indices)
 
 
 if __name__ == "__main__":

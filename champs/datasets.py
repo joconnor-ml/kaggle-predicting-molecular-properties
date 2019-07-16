@@ -76,7 +76,7 @@ class ChampsDataset(InMemoryDataset):
                 edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor),
                 y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor),
                 target_index=torch.from_numpy(target_indices).type(torch.int64),
-                target_class=torch.from_numpy(target_classes).type(torch.uint8),
+                target_class=torch.from_numpy(target_classes.reshape(-1, 1)).type(torch.uint8),
                 num_nodes=atom_features.shape[0]
             )
 

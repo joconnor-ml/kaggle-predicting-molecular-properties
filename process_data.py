@@ -86,13 +86,27 @@ def process_multiple(data_file, structure_dir, output_dir):
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     results = pool.map(structure_to_graph, structure_files)
 
-    for (edge_array, edge_features, atom_features), targets, target_indices, molecule_name in \
-            zip(results, targets, target_indices, molecule_names):
+    target_map = {
+        '1JHC': 0,
+        '1JHN': 1,
+        '2JHC': 2,
+        '2JHH': 3,
+        '2JHN': 4,
+        '3JHC': 5,
+        '3JHH': 6,
+        '3JHN': 7
+    }
+    target_classes = [grps.get_group(molecule_name)["type"].map(target_map).values
+                      for molecule_name in molecule_names]
+
+    for (edge_array, edge_features, atom_features), targets, target_index, target_class, molecule_name in \
+            zip(results, targets, target_indices, target_classes, molecule_names):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_features.npy"), edge_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.atom_features.npy"), atom_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.targets.npy"), targets)
-        np.save(os.path.join(output_dir, f"{molecule_name}.target_indices.npy"), target_indices)
+        np.save(os.path.join(output_dir, f"{molecule_name}.target_indices.npy"), target_index)
+        np.save(os.path.join(output_dir, f"{molecule_name}.target_class.npy"), target_class)
 
 
 if __name__ == "__main__":

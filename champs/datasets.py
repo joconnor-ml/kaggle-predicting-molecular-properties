@@ -38,8 +38,8 @@ class ChampsDatasetBasic(Dataset):
 
 class ChampsDataset(InMemoryDataset):
     num_classes = 1
-    csv_file = "../data/csv/train.csv"
-    graph_dir = "../data/graphs/"
+    csv_file = "/mnt/kaggle-predicting-molecular-properties/data/csv/train.csv"
+    graph_dir = "/mnt/kaggle-predicting-molecular-properties/data/graphs/"
 
     def __init__(self, root, transform=None, pre_transform=None):
         super(ChampsDataset, self).__init__(root, transform, pre_transform)
@@ -51,7 +51,7 @@ class ChampsDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return ['champs.big.dataset2']
+        return ['champs.dataset']
 
     def download(self):
         pass
@@ -59,7 +59,6 @@ class ChampsDataset(InMemoryDataset):
     def process(self):
         csv_file = pd.read_csv(self.csv_file)
 
-        graph_dir = self.graph_dir
         id = list(csv_file["molecule_name"].unique())
 
         data_list = []
@@ -93,22 +92,3 @@ class ChampsDataset(InMemoryDataset):
 
         data, slices = self.collate(data_list)
         torch.save((data, slices), self.processed_paths[0])
-
-
-import os.path as osp
-
-import torch
-import torch.nn.functional as F
-from torch.nn import Sequential, Linear, ReLU, GRU
-
-import torch_geometric.transforms as T
-from torch_geometric.datasets import QM9
-from torch_geometric.nn import NNConv, Set2Set, GCNConv
-from torch_geometric.data import DataLoader
-from torch_geometric.utils import remove_self_loops
-
-target = 0
-dim = 64
-
-dataset = ChampsDataset("../sample_data/csv/train.csv", graph_dir="../sample_data/graphs/")
-loader = DataLoader(dataset, batch_size=1, shuffle=False)

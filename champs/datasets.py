@@ -68,7 +68,7 @@ class ChampsDataset(InMemoryDataset):
             atom_features = np.load(os.path.join(self.graph_dir, "{}.atom_features.npy".format(molecule_name)))
             targets = np.load(os.path.join(self.graph_dir, "{}.targets.npy".format(molecule_name)))
             target_indices = np.load(os.path.join(self.graph_dir, "{}.target_indices.npy".format(molecule_name)))
-            target_classes = np.load(os.path.join(self.graph_dir, "{}.target_indices.npy".format(molecule_name)))
+            target_classes = np.load(os.path.join(self.graph_dir, "{}.target_class.npy".format(molecule_name)))
 
             row = Data(
                 x=torch.from_numpy(atom_features).type(torch.FloatTensor),
@@ -76,7 +76,7 @@ class ChampsDataset(InMemoryDataset):
                 edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor),
                 y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor),
                 target_index=torch.from_numpy(target_indices).type(torch.int64),
-                target_class=torch.from_numpy(target_classes.reshape(-1, 1)).type(torch.uint8),
+                target_class=torch.from_numpy(target_classes).type(torch.uint8),
                 num_nodes=atom_features.shape[0]
             )
 

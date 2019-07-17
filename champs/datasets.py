@@ -72,11 +72,11 @@ class ChampsDataset(InMemoryDataset):
 
             row = Data(
                 x=torch.from_numpy(atom_features).type(torch.FloatTensor),
-                edge_index=torch.from_numpy(edge_array).type(torch.int64),
+                edge_index=torch.from_numpy(edge_array).type(torch.LongTensor),
                 edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor),
                 y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor),
-                target_index=torch.from_numpy(target_indices).type(torch.int64),
-                target_class=torch.from_numpy(target_classes).type(torch.uint8),
+                target_index=torch.from_numpy(target_indices).type(torch.LongTensor),
+                target_class=torch.from_numpy(target_classes).type(torch.LongTensor),
                 num_nodes=atom_features.shape[0]
             )
 

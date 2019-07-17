@@ -55,4 +55,4 @@ class Net(torch.nn.Module):
         predict = F.relu(self.lin1(torch.cat([node0, node1, s2s0, s2s1], -1)))
         predict = self.lin2(predict)
         predict = torch.gather(predict, 1, data.target_class.view(-1, 1))
-        return predict.squeeze(-1)
+        return predict

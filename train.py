@@ -17,15 +17,15 @@ std = dataset.data.y[:, target].std().item()
 dataset.data.y[:, target] = (dataset.data.y[:, target] - mean) / std
 
 # Split datasets.
-val_dataset = dataset[::10]
-train_dataset = dataset[1::10]
+val_dataset = dataset[::5]
+train_dataset = dataset[1::5]
 train_loader = DataLoader(
-    train_dataset, batch_size=32,
+    train_dataset, batch_size=64,
     num_workers=2,
     pin_memory=True,
 )
 val_loader = DataLoader(
-    val_dataset, batch_size=32,
+    val_dataset, batch_size=64,
     num_workers=2,
     pin_memory=True,
 )

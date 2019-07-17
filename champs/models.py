@@ -7,7 +7,7 @@ from torch.nn import Sequential, Linear, ReLU, GRU
 
 import torch_geometric.transforms as T
 from torch_geometric.datasets import QM9
-from torch_geometric.nn import NNConv, Set2Set
+from torch_geometric.nn import NNConv, Set2Set, BatchNorm1d
 
 from torch_geometric.datasets import Planetoid
 import torch_geometric.transforms as T
@@ -19,12 +19,22 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
         self.lin0 = torch.nn.Linear(num_features, dim)
 
-        nn = Sequential(Linear(4, 128), ReLU(), Linear(128, dim * dim))
+        nn = Sequential(
+            Linear(4, 128),
+            BatchNorm1d(128, eps=1e-05, momentum=0.1),
+            ReLU(),
+            Linear(128, dim * dim),
+            BatchNorm1d(dim * dim, eps=1e-05, momentum=0.1),
+        )
         self.conv = NNConv(dim, dim, nn, aggr='mean', root_weight=False)
         self.gru = GRU(dim, dim)
 
-        self.set2set = Set2Set(dim, processing_steps=1)
-        self.lin1 = torch.nn.Linear(6 * dim, dim)
+        self.set2set = Set2Set(dim, processing_steps=3)
+        self.lin1 = Sequential(
+            Linear(6 * dim, dim),
+            BatchNorm1d(dim, eps=1e-05, momentum=0.1),
+            ReLU(),
+        )
         self.lin2 = torch.nn.Linear(dim, n_outputs)
 
     def forward(self, data):

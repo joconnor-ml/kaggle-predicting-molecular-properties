@@ -75,6 +75,10 @@ def structure_to_graph(structure_file):
 
 def process_multiple(data_file, structure_dir, output_dir):
     train = pd.read_csv(data_file)
+    class_counts = train.groupby("type").count()
+    class_counts = class_counts / class_counts.mean()
+    class_weight_map = (1/class_counts.to_dict())
+
     molecule_names = train["molecule_name"].unique()
     structure_files = [os.path.join(structure_dir, f"{molecule_name}.xyz")
                        for molecule_name in molecule_names]
@@ -98,18 +102,21 @@ def process_multiple(data_file, structure_dir, output_dir):
     }
     target_classes = [grps.get_group(molecule_name)["type"].map(target_map).values
                       for molecule_name in molecule_names]
+    target_weights = [grps.get_group(molecule_name)["type"].map(class_weight_map).values
+                      for molecule_name in molecule_names]
 
     with open("{}/smiles.txt".format(output_dir), "wt") as f:
         f.writelines([smile+"\n" for edge_array, edge_features, atom_features, smile in results])
 
-    for (edge_array, edge_features, atom_features, smile), targets, target_index, target_class, molecule_name in \
-            zip(results, targets, target_indices, target_classes, molecule_names):
+    for (edge_array, edge_features, atom_features, smile), targets, target_index, target_class, target_weight, molecule_name in \
+            zip(results, targets, target_indices, target_classes, target_weights, molecule_names):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_features.npy"), edge_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.atom_features.npy"), atom_features)
         np.save(os.path.join(output_dir, f"{molecule_name}.targets.npy"), targets)
         np.save(os.path.join(output_dir, f"{molecule_name}.target_indices.npy"), target_index)
         np.save(os.path.join(output_dir, f"{molecule_name}.target_class.npy"), target_class)
+        np.save(os.path.join(output_dir, f"{molecule_name}.target_weight.npy"), target_weight)
 
 
 if __name__ == "__main__":

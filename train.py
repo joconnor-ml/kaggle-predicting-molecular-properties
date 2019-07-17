@@ -47,6 +47,15 @@ def log_mae(predict, truth):
     return score
 
 
+def mae(predict, truth):
+    predict = predict.view(-1)
+    truth = truth.view(-1)
+
+    score = torch.abs(predict-truth)
+    score = score.mean()
+    return score
+
+
 def weighted_log_mae(predict, truth, weights):
     predict = predict.view(-1)
     truth = truth.view(-1)
@@ -64,7 +73,7 @@ def train(epoch):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = log_mae(model(data), data.y)
+        loss = mae(model(data), data.y)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         optimizer.step()
@@ -77,7 +86,7 @@ def test(loader):
 
     for data in loader:
         data = data.to(device)
-        error += log_mae(model(data), data.y).item()
+        error += mae(model(data), data.y).item()
     return error / len(loader.dataset)
 
 

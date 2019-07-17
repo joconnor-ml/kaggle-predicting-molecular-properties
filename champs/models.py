@@ -3,7 +3,7 @@ import os
 
 import torch
 import torch.nn.functional as F
-from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d
+from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm
 
 import torch_geometric.transforms as T
 from torch_geometric.datasets import QM9
@@ -21,10 +21,10 @@ class Net(torch.nn.Module):
 
         nn = Sequential(
             Linear(4, 128),
-            BatchNorm1d(128, eps=1e-05, momentum=0.1),
+            LayerNorm(128),
             ReLU(),
             Linear(128, dim * dim),
-            BatchNorm1d(dim * dim, eps=1e-05, momentum=0.1),
+            LayerNorm(dim * dim),
         )
         self.conv = NNConv(dim, dim, nn, aggr='mean', root_weight=False)
         self.gru = GRU(dim, dim)
@@ -32,7 +32,7 @@ class Net(torch.nn.Module):
         self.set2set = Set2Set(dim, processing_steps=3)
         self.lin1 = Sequential(
             Linear(6 * dim, dim),
-            BatchNorm1d(dim, eps=1e-05, momentum=0.1),
+            LayerNorm(dim),
             ReLU(),
         )
         self.lin2 = Linear(dim, n_outputs)

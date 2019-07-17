@@ -44,7 +44,7 @@ def train(epoch):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = F.mse_loss(model(data), data.y)
+        loss = F.mse_loss(model(data), data.y.squeeze(-1))
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         optimizer.step()
@@ -57,7 +57,7 @@ def test(loader):
 
     for data in loader:
         data = data.to(device)
-        error += (model(data) * std - data.y * std).abs().sum().item()  # MAE
+        error += (model(data) * std - data.y.squeeze(-1) * std).abs().sum().item()  # MAE
     return error / len(loader.dataset)
 
 

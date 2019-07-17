@@ -52,7 +52,7 @@ def mae(predict, truth):
     truth = truth.view(-1)
 
     score = torch.abs(predict-truth)
-    score = score.mean()
+    score = score.sum()
     return score
 
 
@@ -62,7 +62,7 @@ def weighted_log_mae(predict, truth, weights):
 
     score = torch.abs(predict-truth)
     score = torch.log(score) * weights
-    score = score.mean()
+    score = score.sum()
     return score
 
 
@@ -75,7 +75,7 @@ def train(epoch):
         optimizer.zero_grad()
         loss = mae(model(data), data.y)
         loss.backward()
-        loss_all += loss.item() * data.num_graphs
+        loss_all += loss.item()
         optimizer.step()
     return loss_all / len(train_loader.dataset)
 

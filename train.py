@@ -54,7 +54,7 @@ def test(loader):
 
 
 best_val_error = None
-for epoch in range(1, 301):
+for epoch in range(1, 20):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
     val_error = test(val_loader)

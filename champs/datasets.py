@@ -8,34 +8,6 @@ from torch_geometric.data import (InMemoryDataset, download_url, extract_tar,
                                   Data, Dataset)
 
 
-class ChampsDatasetBasic(Dataset):
-    num_classes = 1
-
-    def __init__(self, csv_file, graph_dir):
-        self.csv_file = pd.read_csv(csv_file)
-        self.graph_dir = graph_dir
-        self.id = list(self.csv_file["molecule_name"].unique())
-
-    def __len__(self):
-        return (len(self.id))
-
-    def __getitem__(self, index):
-        molecule_name = self.id[index]
-        edge_array = np.load(os.path.join(self.graph_dir, "{}.edge_array.npy".format(molecule_name)))
-        edge_features = np.load(os.path.join(self.graph_dir, "{}.edge_features.npy".format(molecule_name)))
-        atom_features = np.load(os.path.join(self.graph_dir, "{}.atom_features.npy".format(molecule_name)))
-        targets = np.load(os.path.join(self.graph_dir, "{}.targets.npy".format(molecule_name)))
-        target_indices = np.load(os.path.join(self.graph_dir, "{}.target_indices.npy".format(molecule_name)))
-
-        return Data(
-            x=torch.from_numpy(atom_features).type(torch.FloatTensor),
-            edge_index=torch.from_numpy(edge_array),
-            edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor),
-            y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor),
-            target_indices=torch.from_numpy(target_indices),
-        )
-
-
 class ChampsDataset(InMemoryDataset):
     num_classes = 1
     csv_file = "/mnt/kaggle-predicting-molecular-properties/data/csv/train.csv"
@@ -71,12 +43,12 @@ class ChampsDataset(InMemoryDataset):
             target_classes = np.load(os.path.join(self.graph_dir, "{}.target_class.npy".format(molecule_name)))
 
             row = Data(
-                x=torch.from_numpy(atom_features).type(torch.FloatTensor),
-                edge_index=torch.from_numpy(edge_array).type(torch.LongTensor),
-                edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor),
-                y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor),
-                target_index=torch.from_numpy(target_indices).type(torch.LongTensor),
-                target_class=torch.from_numpy(target_classes).type(torch.LongTensor),
+                x=torch.from_numpy(atom_features).type(torch.FloatTensor).cuda(),
+                edge_index=torch.from_numpy(edge_array).type(torch.LongTensor).cuda(),
+                edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor).cuda(),
+                y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor).cuda(),
+                target_index=torch.from_numpy(target_indices).type(torch.LongTensor).cuda(),
+                target_class=torch.from_numpy(target_classes).type(torch.LongTensor).cuda(),
                 num_nodes=atom_features.shape[0]
             )
 

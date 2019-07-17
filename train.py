@@ -19,8 +19,16 @@ dataset.data.y[:, target] = (dataset.data.y[:, target] - mean) / std
 # Split datasets.
 val_dataset = dataset[::10]
 train_dataset = dataset[1::10]
-train_loader = DataLoader(train_dataset, batch_size=32)
-val_loader = DataLoader(val_dataset, batch_size=128)
+train_loader = DataLoader(
+    train_dataset, batch_size=32,
+    num_workers=2,
+    pin_memory=True,
+)
+val_loader = DataLoader(
+    val_dataset, batch_size=32,
+    num_workers=2,
+    pin_memory=True,
+)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net(dataset.num_features, dim).to(device)

@@ -55,5 +55,6 @@ class Net(torch.nn.Module):
         predict = F.relu(self.lin1(torch.cat([node0, node1, s2s0, s2s1], -1)))
         predict = self.lin2(predict)
         print(predict.shape, data.target_class.shape)
-        predict = torch.gather(predict, 1, data.target_class).view(-1)
-        return predict
+        predict = torch.index_select(predict, dim=1, index=data.target_class)
+        print(predict.shape, data.target_class.shape)
+        return predict.view(-1)

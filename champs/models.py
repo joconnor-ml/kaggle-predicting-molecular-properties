@@ -25,7 +25,7 @@ class Net(torch.nn.Module):
 
         self.set2set = Set2Set(dim, processing_steps=1)
         self.lin1 = torch.nn.Linear(6 * dim, dim)
-        self.lin2 = torch.nn.Linear(dim, 1)
+        self.lin2 = torch.nn.Linear(dim, n_outputs)
 
     def forward(self, data):
         out = F.relu(self.lin0(data.x))

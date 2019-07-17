@@ -37,6 +37,16 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)
 
 
+def log_mae(predict, truth):
+    predict = predict.view(-1)
+    truth = truth.view(-1)
+
+    score = torch.abs(predict-truth)
+    score = score.mean()
+    score = torch.log(score)
+    return score
+
+
 def train(epoch):
     model.train()
     loss_all = 0
@@ -44,7 +54,7 @@ def train(epoch):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = F.mse_loss(model(data), data.y.squeeze(-1))
+        loss = log_mae(model(data), data.y)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         optimizer.step()
@@ -57,7 +67,7 @@ def test(loader):
 
     for data in loader:
         data = data.to(device)
-        error += (model(data) * std - data.y.squeeze(-1) * std).abs().sum().item()  # MAE
+        error += log_mae(model(data), data.y).item()
     return error / len(loader.dataset)
 
 

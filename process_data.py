@@ -75,9 +75,9 @@ def structure_to_graph(structure_file):
 
 def process_multiple(data_file, structure_dir, output_dir):
     train = pd.read_csv(data_file)
-    class_counts = train.groupby("type").count()
+    class_counts = train.groupby("type")["id"].count()
     class_counts = class_counts / class_counts.mean()
-    class_weight_map = (1/class_counts).to_dict()
+    class_weight_map = (1 / class_counts).to_dict()
 
     molecule_names = train["molecule_name"].unique()
     structure_files = [os.path.join(structure_dir, f"{molecule_name}.xyz")

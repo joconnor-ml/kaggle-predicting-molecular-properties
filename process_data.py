@@ -32,7 +32,7 @@ def one_hot_encoding(x, set):
 
 
 def structure_to_graph(structure_file):
-    mol = MolFromXYZ(structure_file)
+    mol, smile = MolFromXYZ(structure_file)
 
     n_atoms = mol.GetNumAtoms()
     edge_array = []
@@ -70,7 +70,7 @@ def structure_to_graph(structure_file):
                                     atom_features["hybridization"], atom_features["num_h"],
                                     atom_features["atomic"]], axis=1)
 
-    return edge_array, edge_features, atom_features
+    return edge_array, edge_features, atom_features, smile
 
 
 def process_multiple(data_file, structure_dir, output_dir):
@@ -99,7 +99,7 @@ def process_multiple(data_file, structure_dir, output_dir):
     target_classes = [grps.get_group(molecule_name)["type"].map(target_map).values
                       for molecule_name in molecule_names]
 
-    for (edge_array, edge_features, atom_features), targets, target_index, target_class, molecule_name in \
+    for (edge_array, edge_features, atom_features, smile), targets, target_index, target_class, molecule_name in \
             zip(results, targets, target_indices, target_classes, molecule_names):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_features.npy"), edge_features)

@@ -469,8 +469,11 @@ def MolFromXYZ(filename):
     try:
         atomicNumList, charge, xyz_coordinates = read_xyz_file(filename)
         mol = xyz2mol(atomicNumList, charge, xyz_coordinates, charged_fragments, quick)
+        # Canonical hack
+        smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
+        m = Chem.MolFromSmiles(smiles)
+        smiles = Chem.MolToSmiles(m, isomericSmiles=True)
     except:
         print(filename)
         mol=None
-    return mol
-
+    return mol, smiles

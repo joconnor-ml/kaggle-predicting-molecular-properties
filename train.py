@@ -82,9 +82,18 @@ def test(loader):
 
 
 best_val_error = None
-for epoch in range(1, 20):
+for epoch in range(1, 500):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
     val_error = test(val_loader)
     scheduler.step(val_error)
     print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation MAE: {:.7f}'.format(epoch, lr, loss, val_error))
+
+    # if 0:
+    if epoch % 10 == 0:
+        torch.save(model.state_dict(), './checkpoint/{:04d}_model.pth'.format(epoch))
+        torch.save({
+            'optimizer': optimizer.state_dict(),
+            'epoch': epoch,
+            'val_loss': val_error,
+        }, './checkpoint/{:04d}_optimizer.pth'.format(epoch))

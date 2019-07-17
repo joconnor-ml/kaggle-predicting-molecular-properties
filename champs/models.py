@@ -16,7 +16,7 @@ from torch_geometric.nn import GCNConv, ChebConv  # noqa
 class Net(torch.nn.Module):
     def __init__(self, num_features, dim):
         super(Net, self).__init__()
-        self.lin0 = torch.nn.Linear(dataset.num_features, dim)
+        self.lin0 = torch.nn.Linear(num_features, dim)
 
         nn = Sequential(Linear(4, 128), ReLU(), Linear(128, dim * dim))
         self.conv = NNConv(dim, dim, nn, aggr='mean', root_weight=False)

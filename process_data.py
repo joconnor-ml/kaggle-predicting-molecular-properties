@@ -99,6 +99,9 @@ def process_multiple(data_file, structure_dir, output_dir):
     target_classes = [grps.get_group(molecule_name)["type"].map(target_map).values
                       for molecule_name in molecule_names]
 
+    with open("{}/smiles.txt".format(output_dir), "wt") as f:
+        f.writelines([smile+"\n" for edge_array, edge_features, atom_features, smile in results])
+
     for (edge_array, edge_features, atom_features, smile), targets, target_index, target_class, molecule_name in \
             zip(results, targets, target_indices, target_classes, molecule_names):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)

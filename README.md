@@ -11,3 +11,4 @@ where each sample is weighted by 1/n_samples_of_same_group.
 If training a single model for all targets, we should use this
 weighting scheme.
 
+You can see an example in `train.py`.

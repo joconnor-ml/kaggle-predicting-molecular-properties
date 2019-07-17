@@ -64,7 +64,7 @@ def train(epoch):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = log_mae(model(data), data.y, data.weights)
+        loss = log_mae(model(data), data.y, data.target_weight)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         optimizer.step()
@@ -77,7 +77,7 @@ def test(loader):
 
     for data in loader:
         data = data.to(device)
-        error += log_mae(model(data), data.y, data.weights).item()
+        error += log_mae(model(data), data.y, data.target_weight).item()
     return error / len(loader.dataset)
 
 

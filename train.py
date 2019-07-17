@@ -22,7 +22,7 @@ onehot = classes.new_zeros(size=(classes.shape[0], classes.max() + 1)).float()
 onehot.scatter_(1, classes, 1)
 class_probs = onehot.mean(dim=0)
 class_probs = class_probs / class_probs.mean()  # normalise to 1
-dataset.weights = torch.index_select(1 / class_probs, dim=0, index=classes.view(-1))
+dataset.data.weights = torch.index_select(1 / class_probs, dim=0, index=classes.view(-1))
 
 # Split datasets.
 val_dataset = dataset[::10]

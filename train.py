@@ -16,6 +16,14 @@ mean = dataset.data.y[:, target].mean().item()
 std = dataset.data.y[:, target].std().item()
 dataset.data.y[:, target] = (dataset.data.y[:, target] - mean) / std
 
+# calculate class weights
+classes = dataset.data.target_class.view(-1, 1).long()
+onehot = classes.new_zeros(size=(classes.shape[0], classes.max() + 1)).float()
+onehot.scatter_(1, classes, 1)
+class_probs = onehot.mean(dim=0)
+class_probs = class_probs / class_probs.mean()  # normalise to 1
+dataset.weights = torch.index_select(1 / class_probs, dim=0, index=classes.view(-1))
+
 # Split datasets.
 val_dataset = dataset[::10]
 train_dataset = dataset[1::10]
@@ -47,14 +55,25 @@ def log_mae(predict, truth):
     return score
 
 
+def weighted_log_mae(predict, truth, weights):
+    predict = predict.view(-1)
+    truth = truth.view(-1)
+
+    score = torch.abs(predict-truth)
+    score = torch.log(score) * weights
+    score = score.mean()
+    return score
+
+
 def train(epoch):
     model.train()
     loss_all = 0
 
+
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = log_mae(model(data), data.y)
+        loss = log_mae(model(data), data.y, data.weights)
         loss.backward()
         loss_all += loss.item() * data.num_graphs
         optimizer.step()
@@ -67,7 +86,7 @@ def test(loader):
 
     for data in loader:
         data = data.to(device)
-        error += log_mae(model(data), data.y).item()
+        error += log_mae(model(data), data.y, data.weights).item()
     return error / len(loader.dataset)
 
 

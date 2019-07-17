@@ -3,11 +3,11 @@ import os
 
 import torch
 import torch.nn.functional as F
-from torch.nn import Sequential, Linear, ReLU, GRU
+from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d
 
 import torch_geometric.transforms as T
 from torch_geometric.datasets import QM9
-from torch_geometric.nn import NNConv, Set2Set, BatchNorm1d
+from torch_geometric.nn import NNConv, Set2Set
 
 from torch_geometric.datasets import Planetoid
 import torch_geometric.transforms as T
@@ -35,7 +35,7 @@ class Net(torch.nn.Module):
             BatchNorm1d(dim, eps=1e-05, momentum=0.1),
             ReLU(),
         )
-        self.lin2 = torch.nn.Linear(dim, n_outputs)
+        self.lin2 = Linear(dim, n_outputs)
 
     def forward(self, data):
         out = F.relu(self.lin0(data.x))

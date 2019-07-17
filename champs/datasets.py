@@ -43,12 +43,12 @@ class ChampsDataset(InMemoryDataset):
             target_classes = np.load(os.path.join(self.graph_dir, "{}.target_class.npy".format(molecule_name)))
 
             row = Data(
-                x=torch.from_numpy(atom_features).type(torch.FloatTensor).cuda(),
-                edge_index=torch.from_numpy(edge_array).type(torch.LongTensor).cuda(),
-                edge_attr=torch.from_numpy(edge_features).type(torch.FloatTensor).cuda(),
-                y=torch.from_numpy(targets.reshape(-1, 1)).type(torch.FloatTensor).cuda(),
-                target_index=torch.from_numpy(target_indices).type(torch.LongTensor).cuda(),
-                target_class=torch.from_numpy(target_classes).type(torch.LongTensor).cuda(),
+                x=torch.from_numpy(atom_features).float(),
+                edge_index=torch.from_numpy(edge_array).long(),
+                edge_attr=torch.from_numpy(edge_features).float(),
+                y=torch.from_numpy(targets.reshape(-1, 1)).float(),
+                target_index=torch.from_numpy(target_indices).long(),
+                target_class=torch.from_numpy(target_classes).long(),
                 num_nodes=atom_features.shape[0]
             )
 

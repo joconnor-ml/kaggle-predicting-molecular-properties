@@ -50,6 +50,6 @@ if __name__ == "__main__":
         return np.concatenate(preds)
 
     preds = test(val_loader)
-    preds = pd.Series(preds)
+    preds = pd.Series(preds) * std + mean
     print(preds.head())
     preds.to_csv("output/preds.csv")

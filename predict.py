@@ -34,7 +34,8 @@ if __name__ == "__main__":
 
     device = torch.device('cpu')
     model = Net(dataset.num_features, dim).to(device)
-    checkpoint = torch.load(args.checkpoint_file, map_location=torch.device('cpu'))
+    checkpoint = torch.load(args.checkpoint_file, map_location=device)
+    print(checkpoint)
     model.load_state_dict(checkpoint)
 
     def mae(predict, truth):

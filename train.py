@@ -10,12 +10,12 @@ import torch
 dim = 64
 
 dataset = ChampsDatasetMultiTarget("./data/")
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 # Normalize targets to mean = 0 and std = 1.
-mean = dataset.data.y.sum(dim=0) / (dataset.data.y != 0).float().cuda().sum(dim=0)
-std = (dataset.data.y.pow(2).sum(dim=0) / (dataset.data.y != 0).float().cuda().sum(dim=0) - mean.pow(2)).pow(0.5)
+mean = dataset.data.y.mean(dim=0)
+std = dataset.data.y.std(dim=0)
+
+# TODO: the following doesnt do what I expected
+#mean = dataset.data.y[dataset.data.y != 0].mean(dim=0)
 #std = dataset.data.y[dataset.data.y != 0].std(dim=0)
 
 print(mean, std)
@@ -24,8 +24,8 @@ dataset.data.y = (dataset.data.y - mean) / std
 print(dataset[0].y)
 
 # Split datasets.
-val_dataset = dataset[::5]
-train_dataset = dataset[1::5]
+val_dataset = dataset[::2]
+train_dataset = dataset[1::2]
 train_loader = DataLoader(
     train_dataset, batch_size=64,
     num_workers=2,
@@ -37,6 +37,7 @@ val_loader = DataLoader(
     pin_memory=True,
 )
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net(dataset.num_features, dim).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -98,7 +99,7 @@ def test(loader):
 
 
 best_val_error = None
-for epoch in range(1, 11):
+for epoch in range(1, 501):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
     val_error = test(val_loader)
@@ -107,7 +108,7 @@ for epoch in range(1, 11):
 
     # if 0:
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), './checkpoint/multiscale2.{:04d}_model.pth'.format(epoch))
+        torch.save(model.state_dict(), './checkpoint/multiscale.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,

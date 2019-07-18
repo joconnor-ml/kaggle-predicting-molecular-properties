@@ -22,9 +22,8 @@ if __name__ == "__main__":
 
     test_dataset = ChampsTestDataset("./data/")
     # Normalize targets to mean = 0 and std = 1.
-    mean = test_dataset.data.y[:, target].mean().item()
-    std = test_dataset.data.y[:, target].std().item()
-    test_dataset.data.y[:, target] = (test_dataset.data.y[:, target] - mean) / std
+    mean = 15.9187472
+    std = 34.93184728
 
     # Split datasets.
     test_loader = DataLoader(

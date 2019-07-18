@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from champs.datasets import ChampsDataset
+from champs.datasets import ChampsDataset, ChampsDatasetMultiTarget
 from champs.models import Net
 from torch_geometric.data import DataLoader
 import torch.nn.functional as F
@@ -9,7 +9,7 @@ import torch
 
 dim = 64
 
-dataset = ChampsDataset("./data2/")
+dataset = ChampsDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
 mean = dataset.data.y.mean(axis=0).item()
 std = dataset.data.y.std().item()

@@ -41,8 +41,7 @@ if __name__ == "__main__":
         preds = []
         for data in loader:
             data = data.to(device)
-            p = model(data)
-            preds.append(p.detach().cpu().numpy())
+            preds.append(model(data).detach().cpu().numpy())
 
         return np.concatenate(preds)
 

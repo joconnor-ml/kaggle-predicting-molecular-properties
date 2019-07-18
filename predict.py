@@ -48,4 +48,4 @@ if __name__ == "__main__":
     preds = test(test_loader)
     preds = pd.Series(preds)
     print(preds.head())
-    preds.to_csv("output/preds.test.csv")
+    preds.to_csv(args.outfile)

@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('checkpoint_file', type=str)
+    parser.add_argument('outfile', type=str)
     args = parser.parse_args()
 
     target = 0
@@ -52,4 +53,4 @@ if __name__ == "__main__":
     preds = test(val_loader)
     preds = pd.Series(preds) * std + mean
     print(preds.head())
-    preds.to_csv("output/preds.csv")
+    preds.to_csv(args.outfile)

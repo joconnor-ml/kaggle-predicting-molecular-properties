@@ -7,14 +7,14 @@ import torch.nn.functional as F
 import torch
 
 
-target = 0
 dim = 64
 
 dataset = ChampsDataset("./data/")
 # Normalize targets to mean = 0 and std = 1.
-mean = dataset.data.y[:, target].mean().item()
-std = dataset.data.y[:, target].std().item()
-dataset.data.y[:, target] = (dataset.data.y[:, target] - mean) / std
+mean = dataset.data.y.mean(axis=0).item()
+std = dataset.data.y.std().item()
+print(mean, std)
+dataset.data.y = (dataset.data.y - mean) / std
 
 # Split datasets.
 val_dataset = dataset[::5]
@@ -91,7 +91,7 @@ def test(loader):
 
 
 best_val_error = None
-for epoch in range(1, 500):
+for epoch in range(1, 101):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
     val_error = test(val_loader)
@@ -100,7 +100,7 @@ for epoch in range(1, 500):
 
     # if 0:
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), './checkpoint/{:04d}_model.pth'.format(epoch))
+        torch.save(model.state_dict(), './checkpoint/multiscale.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,

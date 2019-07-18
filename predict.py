@@ -35,23 +35,13 @@ if __name__ == "__main__":
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)
 
-    # Normalize targets to mean = 0 and std = 1.
-    mean = torch.from_numpy(
-        np.array([14.4633,  0.4420, -0.0663, -0.8348,  0.0800,  1.1960,  0.6049,  0.0354]),
-    ).to(device)
-    std = torch.from_numpy(
-        np.array([34.8631,  4.6798,  2.2415,  3.0292,  0.7675,  2.4574,  2.0641,  0.3092])
-    ).to(device)
-
     def test(loader):
         model.eval()
-        error = 0
 
         preds = []
         for data in loader:
             data = data.to(device)
-            p = model(data) * std + mean
-            p = torch.gather(p, 1, data.target_class.view(-1, 1)).squeeze(-1)
+            p = model(data)
             preds.append(p.detach().cpu().numpy())
 
         return np.concatenate(preds)

@@ -11,8 +11,8 @@ dim = 64
 
 dataset = ChampsDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
-mean = dataset.data.y.sum(dim=0) / (dataset.data.y != 0).sum(axis=0)
-std = (dataset.data.y.pow(2).sum(dim=0) / (dataset.data.y != 0).sum(axis=0) - mean.pow(2)).pow(0.5)
+mean = dataset.data.y.sum(dim=0) / (dataset.data.y != 0).sum(dim=0)
+std = (dataset.data.y.pow(2).sum(dim=0) / (dataset.data.y != 0).sum(dim=0) - mean.pow(2)).pow(0.5)
 #std = dataset.data.y[dataset.data.y != 0].std(dim=0)
 
 print(mean, std)

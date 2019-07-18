@@ -58,9 +58,7 @@ class Net(torch.nn.Module):
         node1 = torch.index_select(out, dim=0, index=atom1.view(-1))
 
         # add set2set output over atoms
-        s2s = self.set2set(out, torch.arange(0, out.shape[0],
-                                             dtype=data.edge_index.dtype,
-                                             device=data.edge_index.device))
+        s2s = self.set2set(out, torch.arange(0, out.shape[0]).long.cuda())
         s2s0 = torch.index_select(s2s, dim=0, index=atom0.view(-1))
         s2s1 = torch.index_select(s2s, dim=0, index=atom1.view(-1))
 

@@ -32,11 +32,10 @@ if __name__ == "__main__":
         pin_memory=True,
     )
 
-    device = torch.device('cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net(dataset.num_features, dim).to(device)
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)
-    print(model(dataset[0]))
 
     def test(loader):
         model.eval()
@@ -53,4 +52,6 @@ if __name__ == "__main__":
     preds_tensor = (preds_tensor * std) + mean
 
     import pandas as pd
-    pd.Series(preds_tensor.numpy()).to_csv("output/preds.csv")
+    preds = pd.Series(preds_tensor.numpy())
+    print(preds.head())
+    preds.to_csv("output/preds.csv")

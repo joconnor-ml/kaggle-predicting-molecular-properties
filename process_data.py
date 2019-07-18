@@ -73,7 +73,7 @@ def structure_to_graph(structure_file):
     return edge_array, edge_features, atom_features, smile
 
 
-def process_multiple(data_file, structure_dir, output_dir):
+def process_multiple(data_file, structure_dir, output_dir, test=False):
     train = pd.read_csv(data_file)
     class_counts = train.groupby("type")["id"].count()
     class_counts = class_counts / class_counts.mean()
@@ -83,12 +83,17 @@ def process_multiple(data_file, structure_dir, output_dir):
     structure_files = [os.path.join(structure_dir, f"{molecule_name}.xyz")
                        for molecule_name in molecule_names]
     grps = train.groupby("molecule_name")
-    targets = [grps.get_group(molecule_name)["scalar_coupling_constant"].values
-               for molecule_name in molecule_names]
     target_indices = [grps.get_group(molecule_name)[["atom_index_0", "atom_index_1"]].values.T
                       for molecule_name in molecule_names]
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     results = pool.map(structure_to_graph, structure_files)
+
+    try:
+        targets = [grps.get_group(molecule_name)["scalar_coupling_constant"].values
+                   for molecule_name in molecule_names]
+    except:
+        print("Targets not found: assuming this is test data")
+        targets = [np.array([]) for _ in molecule_names]
 
     target_map = {
         '1JHC': 0,

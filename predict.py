@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # Split datasets.
     val_dataset = dataset[::5]
     val_loader = DataLoader(
-        val_dataset, batch_size=256,
+        val_dataset, batch_size=64,
         num_workers=2,
         pin_memory=True,
     )
@@ -38,22 +38,19 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint)
     print(model(dataset[0]))
 
-    def mae(predict, truth):
-        predict = predict.view(-1)
-        truth = truth.view(-1)
-
-        score = torch.abs(predict-truth)
-        score = score.sum()
-        return score
-
-
     def test(loader):
         model.eval()
         error = 0
 
+        preds = []
         for data in loader:
             data = data.to(device)
-            error += mae(model(data), data.y).item()
-        return error / len(loader.dataset)
+            preds.append(model(data))
 
-    test(val_loader)
+        return torch.cat(preds)
+
+    preds_tensor = test(val_loader)
+    preds_tensor = (preds_tensor * std) + mean
+
+    import pandas as pd
+    pd.Series(preds_tensor.numpy()).to_csv("output/preds.csv")

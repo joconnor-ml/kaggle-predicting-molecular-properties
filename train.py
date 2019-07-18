@@ -9,7 +9,7 @@ import torch
 
 dim = 64
 
-dataset = ChampsDataset("./data/")
+dataset = ChampsDataset("./data2/")
 # Normalize targets to mean = 0 and std = 1.
 mean = dataset.data.y.mean(axis=0).item()
 std = dataset.data.y.std().item()

@@ -11,8 +11,10 @@ dim = 64
 
 dataset = ChampsDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
-mean = dataset.data.y.mean(dim=0)
-std = dataset.data.y.std(dim=0)
+mean = dataset.data.y.sum(dim=0) / (dataset.data.y != 0).sum(axis=0)
+std = (dataset.data.y.pow(2).sum(dim=0) / (dataset.data.y != 0).sum(axis=0) - mean.pow(2)).pow(0.5)
+#std = dataset.data.y[dataset.data.y != 0].std(dim=0)
+
 print(mean, std)
 print(dataset[0].y)
 dataset.data.y = (dataset.data.y - mean) / std
@@ -94,7 +96,7 @@ def test(loader):
 
 
 best_val_error = None
-for epoch in range(1, 101):
+for epoch in range(1, 11):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
     val_error = test(val_loader)
@@ -103,7 +105,7 @@ for epoch in range(1, 101):
 
     # if 0:
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), './checkpoint/multiscale.{:04d}_model.pth'.format(epoch))
+        torch.save(model.state_dict(), './checkpoint/multiscale2.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,

@@ -37,6 +37,9 @@ if __name__ == "__main__":
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)
 
+    print(model(dataset[0].to(device))*std + mean)
+    print(model(dataset[5].to(device))*std + mean)
+
     def test(loader):
         model.eval()
         error = 0

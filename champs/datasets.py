@@ -103,7 +103,7 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
             target_classes = np.load(os.path.join(self.graph_dir, "{}.target_class.npy".format(molecule_name)))
             target_weights = np.load(os.path.join(self.graph_dir, "{}.target_weight.npy".format(molecule_name)))
 
-            target_matrix = np.zeros(targets.shape[0], 8, dtype=np.float32)
+            target_matrix = np.zeros((targets.shape[0], 8), dtype=np.float32)
             target_matrix[:, target_classes] = targets
             target_matrix[np.arange(target_classes.shape[0]), target_classes] = targets
 

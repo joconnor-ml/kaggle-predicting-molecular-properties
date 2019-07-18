@@ -14,7 +14,9 @@ dataset = ChampsDatasetMultiTarget("./data/")
 mean = dataset.data.y.mean(dim=0)
 std = dataset.data.y.std(dim=0)
 print(mean, std)
+print(dataset[0].y)
 dataset.data.y = (dataset.data.y - mean) / std
+print(dataset[0].y)
 
 # Split datasets.
 val_dataset = dataset[::5]
@@ -47,11 +49,12 @@ def log_mae(predict, truth):
     return score
 
 
-def mae(predict, truth):
+def mae(predict, truth, target_class):
+    y = torch.gather(truth, 1, target_class.view(-1, 1)).squeeze(-1)
     predict = predict.view(-1)
-    truth = truth.view(-1)
+    y = y.view(-1)
 
-    score = torch.abs(predict-truth)
+    score = torch.abs(predict-y)
     score = score.sum()
     return score
 
@@ -73,7 +76,7 @@ def train(epoch):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = mae(model(data), data.y)
+        loss = mae(model(data), data.y, data.target_class)
         loss.backward()
         loss_all += loss.item()
         optimizer.step()
@@ -86,7 +89,7 @@ def test(loader):
 
     for data in loader:
         data = data.to(device)
-        error += mae(model(data), data.y).item()
+        error += mae(model(data), data.y, data.target_class).item()
     return error / len(loader.dataset)
 
 

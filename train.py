@@ -10,9 +10,12 @@ import torch
 dim = 64
 
 dataset = ChampsDatasetMultiTarget("./data/")
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 # Normalize targets to mean = 0 and std = 1.
-mean = dataset.data.y.sum(dim=0) / (dataset.data.y != 0).sum(dim=0)
-std = (dataset.data.y.pow(2).sum(dim=0) / (dataset.data.y != 0).sum(dim=0) - mean.pow(2)).pow(0.5)
+mean = dataset.data.y.sum(dim=0) / (dataset.data.y != 0).float().cuda().sum(dim=0)
+std = (dataset.data.y.pow(2).sum(dim=0) / (dataset.data.y != 0).float().cuda().sum(dim=0) - mean.pow(2)).pow(0.5)
 #std = dataset.data.y[dataset.data.y != 0].std(dim=0)
 
 print(mean, std)
@@ -34,7 +37,6 @@ val_loader = DataLoader(
     pin_memory=True,
 )
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net(dataset.num_features, dim).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

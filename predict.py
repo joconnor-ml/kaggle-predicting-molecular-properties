@@ -26,22 +26,16 @@ if __name__ == "__main__":
 
     # Split datasets.
     val_dataset = dataset[::5]
-    train_dataset = dataset[1::5]
-    train_loader = DataLoader(
-        train_dataset, batch_size=64,
-        num_workers=2,
-        pin_memory=True,
-    )
     val_loader = DataLoader(
-        val_dataset, batch_size=64,
+        val_dataset, batch_size=256,
         num_workers=2,
         pin_memory=True,
     )
 
     device = torch.device('cpu')
     model = Net(dataset.num_features, dim).to(device)
-    checkpoint = torch.load(args.checkpoint_file)
-    model.load_state_dict(checkpoint['state_dict'])
+    checkpoint = torch.load(args.checkpoint_file, map_location=torch.device('cpu'))
+    model.load_state_dict(checkpoint)
 
     def mae(predict, truth):
         predict = predict.view(-1)

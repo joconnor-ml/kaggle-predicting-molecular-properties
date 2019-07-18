@@ -6,6 +6,8 @@ from torch_geometric.data import DataLoader
 import torch.nn.functional as F
 import torch
 
+import pandas as pd
+import numpy as np
 
 if __name__ == "__main__":
 
@@ -29,16 +31,12 @@ if __name__ == "__main__":
     val_loader = DataLoader(
         val_dataset, batch_size=64,
         num_workers=2,
-        pin_memory=True,
     )
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net(dataset.num_features, dim).to(device)
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)
-
-    print(model(dataset[0].to(device))*std + mean)
-    print(model(dataset[5].to(device))*std + mean)
 
     def test(loader):
         model.eval()
@@ -47,14 +45,11 @@ if __name__ == "__main__":
         preds = []
         for data in loader:
             data = data.to(device)
-            preds.append(model(data))
+            preds.append(model(data).numpy())
 
-        return torch.cat(preds)
+        return np.concatenate(preds)
 
-    preds_tensor = test(val_loader)
-    preds_tensor = (preds_tensor * std) + mean
-
-    import pandas as pd
-    preds = pd.Series(preds_tensor.numpy())
+    preds = test(val_loader)
+    preds = pd.Series(preds)
     print(preds.head())
     preds.to_csv("output/preds.csv")

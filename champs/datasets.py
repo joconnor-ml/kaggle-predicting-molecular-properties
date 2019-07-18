@@ -14,7 +14,7 @@ class ChampsDataset(InMemoryDataset):
     graph_dir = "/mnt/kaggle-predicting-molecular-properties/data/graphs/"
 
     def __init__(self, root, transform=None, pre_transform=None):
-        super(ChampsDataset, self).__init__(root, transform, pre_transform)
+        super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
@@ -74,7 +74,7 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
     graph_dir = "/mnt/kaggle-predicting-molecular-properties/data/graphs/"
 
     def __init__(self, root, transform=None, pre_transform=None):
-        super(ChampsDataset, self).__init__(root, transform, pre_transform)
+        super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
@@ -138,7 +138,7 @@ class ChampsTestDataset(InMemoryDataset):
     graph_dir = "/mnt/kaggle-predicting-molecular-properties/data/graphs/test"
 
     def __init__(self, root, transform=None, pre_transform=None):
-        super(ChampsTestDataset, self).__init__(root, transform, pre_transform)
+        super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property

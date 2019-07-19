@@ -473,7 +473,8 @@ def MolFromXYZ(filename):
         smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
         m = Chem.MolFromSmiles(smiles)
         smiles = Chem.MolToSmiles(m, isomericSmiles=True)
-    except:
+    except Exception as e:
+        print(e)
         print(filename)
         mol=None
     return mol, smiles

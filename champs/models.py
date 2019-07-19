@@ -9,6 +9,7 @@ from torch_geometric import nn
 
 from torch_scatter import scatter_add, scatter_max
 from torch_geometric.utils import scatter_
+import math
 
 
 
@@ -124,11 +125,11 @@ class SingleTargetNet(torch.nn.Module):
         return predict
 
 
-class LinearBn(nn.Module):
+class LinearBn(torch.nn.Module):
     def __init__(self, in_channel, out_channel, act=None):
         super(LinearBn, self).__init__()
-        self.linear = nn.Linear(in_channel, out_channel, bias=False)
-        self.bn   = nn.BatchNorm1d(out_channel,eps=1e-05, momentum=0.1)
+        self.linear = torch.nnLinear(in_channel, out_channel, bias=False)
+        self.bn   = torch.nnBatchNorm1d(out_channel,eps=1e-05, momentum=0.1)
         self.act  = act
 
     def forward(self, x):
@@ -140,24 +141,24 @@ class LinearBn(nn.Module):
         return x
 
 
-class GraphConv(nn.Module):
+class GraphConv(torch.nnModule):
     def __init__(self, node_dim, edge_dim ):
         super(GraphConv, self).__init__()
 
-        self.encoder = nn.Sequential(
+        self.encoder = torch.nnSequential(
             LinearBn(edge_dim, 256),
-            nn.ReLU(inplace=True),
+            torch.nnReLU(inplace=True),
             LinearBn(256, 256),
-            nn.ReLU(inplace=True),
+            torch.nnReLU(inplace=True),
             LinearBn(256, 128),
-            nn.ReLU(inplace=True),
+            torch.nnReLU(inplace=True),
             LinearBn(128, node_dim * node_dim),
-            #nn.ReLU(inplace=True),
+            #torch.nnReLU(inplace=True),
         )
 
 
-        self.gru  = nn.GRU(node_dim, node_dim, batch_first=False, bidirectional=False)
-        self.bias = nn.Parameter(torch.Tensor(node_dim))
+        self.gru  = torch.nnGRU(node_dim, node_dim, batch_first=False, bidirectional=False)
+        self.bias = torch.nnParameter(torch.Tensor(node_dim))
         self.bias.data.uniform_(-1.0 / math.sqrt(node_dim), 1.0 / math.sqrt(node_dim))
 
 
@@ -185,7 +186,7 @@ class GraphConv(nn.Module):
 
         return update, hidden
 
-class Set2Set(torch.nn.Module):
+class Set2Set(torch.torch.nnModule):
 
     def softmax(self, x, index, num=None):
         x = x -  scatter_max(x, index, dim=0, dim_size=num)[0][index]
@@ -231,11 +232,11 @@ class HengNet(torch.nn.Module):
         self.num_propagate = 6
         self.num_s2s = 6
 
-        self.preprocess = nn.Sequential(
+        self.preprocess = torch.nnSequential(
             LinearBn(node_dim, 128),
-            nn.ReLU(inplace=True),
+            torch.nnReLU(inplace=True),
             LinearBn(128, 128),
-            nn.ReLU(inplace=True),
+            torch.nnReLU(inplace=True),
         )
 
         self.propagate = GraphConv(128, edge_dim)
@@ -243,12 +244,12 @@ class HengNet(torch.nn.Module):
 
 
         #predict coupling constant
-        self.predict = nn.Sequential(
+        self.predict = torch.nnSequential(
             LinearBn(4*128, 1024),  #node_hidden_dim
-            nn.ReLU(inplace=True),
+            torch.nnReLU(inplace=True),
             LinearBn( 1024, 512),
-            nn.ReLU(inplace=True),
-            nn.Linear(512, num_target),
+            torch.nnReLU(inplace=True),
+            torch.nnLinear(512, num_target),
         )
 
     def forward(self, data):

@@ -47,7 +47,7 @@ class Net(torch.nn.Module):
         )
 
     def forward(self, data):
-        out = F.relu(self.lin0(data.x))
+        out = self.preprocess(data.x)
         h = out.unsqueeze(0)
 
         for i in range(3):

@@ -7,7 +7,7 @@ import torch.nn.functional as F
 import torch
 
 
-dim = 64
+dim = 32
 
 dataset = ChampsDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.

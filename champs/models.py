@@ -25,14 +25,14 @@ class Net(torch.nn.Module):
             ReLU(),
         )
 
-        nn = Sequential(
+        enc = Sequential(
             Linear(4, dim),
             LayerNorm(dim),
             ReLU(),
             Linear(dim, dim * dim),
             LayerNorm(dim * dim),
         )
-        self.conv = nn.NNConv(dim, dim, nn, aggr='mean', root_weight=False)
+        self.conv = nn.NNConv(dim, dim, enc, aggr='mean', root_weight=False)
         self.gru = GRU(dim, dim)
 
         self.set2set = nn.Set2Set(dim, processing_steps=3)

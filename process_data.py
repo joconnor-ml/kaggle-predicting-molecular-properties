@@ -44,7 +44,7 @@ def structure_to_graph(structure_file):
     structure = pd.read_csv(structure_file, skiprows=1, header=None, sep=" ",
                             names=["atom", "x", "y", "z"])
     structure["radius"] = structure["atom"].map({'H': 0.38, 'C': 0.77, 'N': 0.75, 'O': 0.73, 'F': 0.71})
-    xyz = structure["x", "y", "z"]
+    xyz = structure[["x", "y", "z"]]
     norm_xyz = preprocessing.normalize(xyz, norm='l2')
 
     n_atoms = mol.GetNumAtoms()

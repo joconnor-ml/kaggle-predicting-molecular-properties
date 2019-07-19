@@ -71,7 +71,7 @@ class Net(torch.nn.Module):
         atom_index = torch.arange(0, out.shape[0], device=out.device).long()
 
         s2s = self.set2set(out, data.batch)
-        s2s = torch.index_select(s2s, dim=0, index=data.batch)
+        s2s = torch.index_select(s2s, dim=0, index=atom_index)
 
         predict = self.predict(torch.cat([node0, node1, s2s], -1))
         predict = torch.gather(predict, 1, data.target_class.view(-1, 1)).squeeze(-1)

@@ -127,7 +127,7 @@ class SingleTargetNet(torch.nn.Module):
 
 class LinearBn(torch.nn.Module):
     def __init__(self, in_channel, out_channel, act=None):
-        super(LinearBn, self).__init__()
+        super().__init__()
         self.linear = torch.nnLinear(in_channel, out_channel, bias=False)
         self.bn   = torch.nnBatchNorm1d(out_channel,eps=1e-05, momentum=0.1)
         self.act  = act
@@ -143,7 +143,7 @@ class LinearBn(torch.nn.Module):
 
 class GraphConv(torch.nn.Module):
     def __init__(self, node_dim, edge_dim ):
-        super(GraphConv, self).__init__()
+        super().__init__()
 
         self.encoder = torch.nnSequential(
             LinearBn(edge_dim, 256),
@@ -228,7 +228,7 @@ class Set2Set(torch.torch.nn.Module):
 
 class HengNet(torch.nn.Module):
     def __init__(self, node_dim=13, edge_dim=5, num_target=8):
-        super(Net, self).__init__()
+        super().__init__()
         self.num_propagate = 6
         self.num_s2s = 6
 

@@ -15,7 +15,7 @@ sum = dataset.data.y.sum(dim=0)
 print(sum)
 sum2 = (dataset.data.y ** 2).sum(dim=0)
 print(sum2)
-nonzero = (dataset.data.y != 0).sum(dim=0)
+nonzero = (dataset.data.y != 0).sum(dim=0).float()
 print(nonzero)
 mean = sum / nonzero
 print(mean)

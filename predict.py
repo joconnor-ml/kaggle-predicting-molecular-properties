@@ -24,7 +24,7 @@ if __name__ == "__main__":
     dataset = ChampsDataset("./data/")
 
     # Split datasets.
-    test_dataset = dataset[::5]
+    test_dataset = dataset[::2]
     test_loader = DataLoader(
         test_dataset, batch_size=64,
         num_workers=2,

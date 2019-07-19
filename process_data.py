@@ -88,7 +88,7 @@ def structure_to_graph(structure_file):
         np.array(bond_features),
         one_hot_numpy(distance),
         one_hot_numpy(rel_distance),
-        # one_hot_numpy(angle),
+        np.array(angle)  # absolute bond angle. Can use to calculate dihedral angles
     ], axis=1)
 
     atom_features = defaultdict(list)

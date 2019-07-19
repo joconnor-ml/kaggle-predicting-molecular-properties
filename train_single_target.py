@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 from champs.datasets import ChampsDataset, ChampsDatasetMultiTarget
-from champs.models import Net
+from champs.models import Net, HengNet
 from torch_geometric.data import DataLoader
 import torch.nn.functional as F
 import torch
@@ -43,7 +43,7 @@ val_loader = DataLoader(
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Net(dataset.num_features, dim).to(device)
+model = HengNet(dataset.num_features, dim).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)

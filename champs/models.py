@@ -14,30 +14,41 @@ import math
 
 
 class Net(torch.nn.Module):
-    def __init__(self, num_features, dim, n_outputs=8):
+    def __init__(self, num_features, dim, n_outputs=8, edge_dim=4):
         super().__init__()
-        self.lin0 = torch.nn.Linear(num_features, dim)
-
-        nn = Sequential(
-            Linear(4, 128),
-            LayerNorm(128),
-            ReLU(),
-            Linear(128, dim * dim),
-            LayerNorm(dim * dim),
+        self.preprocess = torch.nn.Sequential(
+            LinearBn(num_features, 128),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(128, 128),
+            torch.nn.ReLU(inplace=True),
         )
-        self.conv = nn.NNConv(dim, dim, nn, aggr='mean', root_weight=False)
+
+        encoder = torch.nn.Sequential(
+            LinearBn(edge_dim, 256),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(256, 256),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(256, 128),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(128, dim * dim),
+            #torch.nn.ReLU(inplace=True),
+        )
+
+        self.conv = nn.NNConv(dim, dim, encoder, aggr='mean', root_weight=False)
         self.gru = GRU(dim, dim)
 
         self.set2set = nn.Set2Set(dim, processing_steps=3)
-        self.lin1 = Sequential(
-            Linear(6 * dim, dim),
-            LayerNorm(dim),
-            ReLU(),
+        #predict coupling constant
+        self.predict = torch.nn.Sequential(
+            LinearBn(4*128, 1024),  #node_hidden_dim
+            torch.nn.ReLU(inplace=True),
+            LinearBn(1024, 512),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(512, n_outputs),
         )
-        self.lin2 = Linear(dim, n_outputs)
 
     def forward(self, data):
-        out = F.relu(self.lin0(data.x))
+        out = self.preprocess(data.x)
         h = out.unsqueeze(0)
 
         for i in range(3):
@@ -59,12 +70,10 @@ class Net(torch.nn.Module):
         # add set2set output over atoms
         atom_index = torch.arange(0, out.shape[0], device=out.device).long()
 
-        s2s = self.set2set(out, atom_index)
-        s2s0 = torch.index_select(s2s, dim=0, index=atom0.view(-1))
-        s2s1 = torch.index_select(s2s, dim=0, index=atom1.view(-1))
+        s2s = self.set2set(out, data.batch)
+        s2s = torch.index_select(s2s, dim=0, index=data.batch)
 
-        predict = F.relu(self.lin1(torch.cat([node0, node1, s2s0, s2s1], -1)))
-        predict = self.lin2(predict)
+        predict = self.predict(torch.cat([node0, node1, s2s], -1))
         predict = torch.gather(predict, 1, data.target_class.view(-1, 1)).squeeze(-1)
         return predict
 

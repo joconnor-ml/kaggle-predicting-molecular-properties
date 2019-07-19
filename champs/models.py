@@ -34,10 +34,10 @@ class Net(torch.nn.Module):
             #torch.nn.ReLU(inplace=True),
         )
 
-        self.conv = nn.NNConv(dim, dim, encoder, aggr='mean', root_weight=False)
+        self.conv = nn.NNConv(128, 128, encoder, aggr='mean', root_weight=False)
         self.gru = GRU(dim, dim)
 
-        self.set2set = nn.Set2Set(dim, processing_steps=3)
+        self.set2set = nn.Set2Set(dim, processing_steps=4)
         #predict coupling constant
         self.predict = torch.nn.Sequential(
             LinearBn(4*128, 1024),  #node_hidden_dim
@@ -51,7 +51,7 @@ class Net(torch.nn.Module):
         out = self.preprocess(data.x)
         h = out.unsqueeze(0)
 
-        for i in range(3):
+        for i in range(4):
             m = F.relu(self.conv(out, data.edge_index, data.edge_attr))
             out, h = self.gru(m.unsqueeze(0), h)
             out = out.squeeze(0)

@@ -17,34 +17,34 @@ class Net(torch.nn.Module):
     def __init__(self, num_features, dim, n_outputs=8, edge_dim=4):
         super().__init__()
         self.preprocess = torch.nn.Sequential(
-            LinearBn(num_features, 128),
+            LinearBn(num_features, dim),
             torch.nn.ReLU(inplace=True),
-            LinearBn(128, 128),
+            LinearBn(dim, dim),
             torch.nn.ReLU(inplace=True),
         )
 
         encoder = torch.nn.Sequential(
-            LinearBn(edge_dim, 256),
+            LinearBn(edge_dim, dim),
             torch.nn.ReLU(inplace=True),
-            LinearBn(256, 256),
+            LinearBn(dim, dim),
             torch.nn.ReLU(inplace=True),
-            LinearBn(256, 128),
+            LinearBn(dim, dim),
             torch.nn.ReLU(inplace=True),
-            LinearBn(128, dim * dim),
+            LinearBn(dim, dim * dim),
             #torch.nn.ReLU(inplace=True),
         )
 
-        self.conv = nn.NNConv(128, 128, encoder, aggr='mean', root_weight=False)
+        self.conv = nn.NNConv(dim, dim, encoder, aggr='mean', root_weight=False)
         self.gru = GRU(dim, dim)
 
         self.set2set = nn.Set2Set(dim, processing_steps=4)
         #predict coupling constant
         self.predict = torch.nn.Sequential(
-            LinearBn(4*128, 1024),  #node_hidden_dim
+            LinearBn(4*dim, 4*dim),  #node_hidden_dim
             torch.nn.ReLU(inplace=True),
-            LinearBn(1024, 512),
+            LinearBn(4*dim, 2*dim),
             torch.nn.ReLU(inplace=True),
-            torch.nn.Linear(512, n_outputs),
+            torch.nn.Linear(2*dim, n_outputs),
         )
 
     def forward(self, data):

@@ -141,7 +141,7 @@ class LinearBn(torch.nn.Module):
         return x
 
 
-class GraphConv(torch.nnModule):
+class GraphConv(torch.nn.Module):
     def __init__(self, node_dim, edge_dim ):
         super(GraphConv, self).__init__()
 
@@ -186,7 +186,7 @@ class GraphConv(torch.nnModule):
 
         return update, hidden
 
-class Set2Set(torch.torch.nnModule):
+class Set2Set(torch.torch.nn.Module):
 
     def softmax(self, x, index, num=None):
         x = x -  scatter_max(x, index, dim=0, dim_size=num)[0][index]

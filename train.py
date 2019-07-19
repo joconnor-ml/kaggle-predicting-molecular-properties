@@ -29,8 +29,8 @@ dataset.data.y = (dataset.data.y - mean) / std
 print(dataset[0].y)
 
 # Split datasets.
-val_dataset = dataset[::2]
-train_dataset = dataset[1::2]
+val_dataset = dataset[::5]
+train_dataset = dataset[1::5]
 train_loader = DataLoader(
     train_dataset, batch_size=64,
     num_workers=2,

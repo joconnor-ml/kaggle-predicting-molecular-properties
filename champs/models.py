@@ -259,9 +259,6 @@ class HengNet(torch.nn.Module):
         for i in range(3):
             out, h = self.propagate(out, data.edge_index, data.edge_attr, h)
 
-        atom_index = torch.arange(0, out.shape[0], device=out.device).long()
-        pool = self.set2set(out, atom_index)
-
         # out is now an atom-level representation
         # now need to run a dense layer over (atom1, atom2) pairs
         atom0, atom1 = torch.split(data.target_index, 1, dim=0)
@@ -269,6 +266,7 @@ class HengNet(torch.nn.Module):
         node1 = torch.index_select(out, dim=0, index=atom1.view(-1))
 
         s2s = self.set2set(out, data.batch)
+        s2s = torch.index_select(s2s, dim=0, index=data.batch)
 
         predict = self.predict(torch.cat([node0, node1, s2s], -1))
         predict = torch.gather(predict, 1, data.target_class.view(-1, 1)).squeeze(-1)

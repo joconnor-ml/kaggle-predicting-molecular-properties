@@ -36,12 +36,15 @@ class Net(torch.nn.Module):
         self.gru = GRU(dim, dim)
 
         self.set2set = nn.Set2Set(dim, processing_steps=3)
-        self.lin1 = Sequential(
-            Linear(4 * dim, dim),
-            LayerNorm(dim),
+        self.predict = Sequential(
+            Linear(4 * dim, 4 * dim),
+            LayerNorm(4 * dim),
             ReLU(),
+            Linear(4 * dim, 4 * dim),
+            LayerNorm(4 * dim),
+            ReLU(),
+            Linear(4 * dim, n_outputs),
         )
-        self.lin2 = Linear(dim, n_outputs)
 
     def forward(self, data):
         out = F.relu(self.lin0(data.x))
@@ -68,10 +71,8 @@ class Net(torch.nn.Module):
 
         s2s = self.set2set(out, atom_index)
         s2s0 = torch.index_select(s2s, dim=0, index=atom0.view(-1))
-        s2s1 = torch.index_select(s2s, dim=0, index=atom1.view(-1))
 
-        predict = F.relu(self.lin1(torch.cat([node0, node1, s2s0, s2s1], -1)))
-        predict = self.lin2(predict)
+        predict = self.predict(torch.cat([node0, node1, s2s0], -1))
         predict = torch.gather(predict, 1, data.target_class.view(-1, 1)).squeeze(-1)
         return predict
 

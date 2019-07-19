@@ -35,6 +35,12 @@ def one_hot_encoding(x, set):
     one_hot = [int(x == s) for s in set]
     return one_hot
 
+def one_hot_numpy(x):
+    b = np.zeros((x.shape[0], x.max()+1))
+    b[np.arange(x.shape[0]), x] = 1
+    return b
+
+
 
 def structure_to_graph(structure_file):
     mol, smile = MolFromXYZ(structure_file)
@@ -72,23 +78,17 @@ def structure_to_graph(structure_file):
         distance.append([r])
         rel_distance.append([rel_dist])  # divide distance by sum of atomic radii
         angle.append([theta])
-        print(r, rel_dist, theta)
+
+    distance = np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8])
+    rel_distance = np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8])
+    angle = np.digitize(np.array(angle), bins=[-1, -.6, -.2, .2, .6])
 
     edge_array = np.array(edge_array).T
     edge_features = np.concatenate([
         np.array(bond_features),
-        one_hot_encoding(
-            np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8]),
-            np.arange(6)
-        ),
-        one_hot_encoding(
-            np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8]),
-            np.arange(6)
-        ),
-        one_hot_encoding(
-            np.digitize(np.array(angle), bins=[-1, -.6, -.2, .2, .6]),
-            np.arange(6)
-        )
+        one_hot_numpy(distance),
+        one_hot_numpy(rel_distance),
+        one_hot_numpy(angle),
     ], axis=1)
 
     atom_features = defaultdict(list)

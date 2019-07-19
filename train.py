@@ -23,10 +23,6 @@ std = (sum2/nonzero - mean**2)**0.5
 print(std)
 
 
-# TODO: the following doesnt do what I expected
-#mean = dataset.data.y[dataset.data.y != 0].mean(dim=0)
-#std = dataset.data.y[dataset.data.y != 0].std(dim=0)
-
 print(mean, std)
 print(dataset[0].y)
 dataset.data.y = (dataset.data.y - mean) / std
@@ -117,9 +113,9 @@ for epoch in range(1, 501):
 
     # if 0:
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), './checkpoint/multiscale.{:04d}_model.pth'.format(epoch))
+        torch.save(model.state_dict(), './checkpoint/multiscale2.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,
             'val_loss': val_error,
-        }, './checkpoint/{:04d}_optimizer.pth'.format(epoch))
+        }, './checkpoint/multiscale2.{:04d}_optimizer.pth'.format(epoch))

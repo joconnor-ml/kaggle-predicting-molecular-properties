@@ -60,7 +60,7 @@ class Net(torch.nn.Module):
         # add set2set output over atoms
         atom_index = torch.arange(0, out.shape[0], device=out.device).long()
 
-        s2s = self.set2set(out)
+        s2s = self.set2set(out, atom_index)
         s2s0 = torch.index_select(s2s, dim=0, index=atom0.view(-1))
         s2s1 = torch.index_select(s2s, dim=0, index=atom1.view(-1))
 

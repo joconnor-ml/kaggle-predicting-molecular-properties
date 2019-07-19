@@ -66,25 +66,28 @@ def structure_to_graph(structure_file):
             bond_type = None
         bond_features.append(one_hot_encoding(bond_type, BONDS))
         r = ((xyz.iloc[i] - xyz.iloc[j])**2).sum()**0.5
+        rel_dist = r/(structure.iloc[i]["radius"] +
+                      structure.iloc[j]["radius"])
+        theta = (norm_xyz[i]*norm_xyz[j]).sum()
         distance.append([r])
-        rel_distance.append([r/(structure.iloc[i]["radius"] +
-                                structure.iloc[j]["radius"])])  # divide distance by sum of atomic radii
-        angle.append([(norm_xyz.iloc[i]*norm_xyz.iloc[j]).sum()])
+        rel_distance.append([rel_dist])  # divide distance by sum of atomic radii
+        angle.append([theta])
+        print(r, rel_dist, theta)
 
     edge_array = np.array(edge_array).T
     edge_features = np.concatenate([
         np.array(bond_features),
         one_hot_encoding(
             np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8]),
-            range(6)
+            np.arange(6)
         ),
         one_hot_encoding(
             np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8]),
-            range(6)
+            np.arange(6)
         ),
         one_hot_encoding(
             np.digitize(np.array(angle), bins=[-1, -.6, -.2, .2, .6]),
-            range(6)
+            np.arange(6)
         )
     ], axis=1)
 

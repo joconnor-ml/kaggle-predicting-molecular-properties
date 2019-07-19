@@ -128,8 +128,8 @@ class SingleTargetNet(torch.nn.Module):
 class LinearBn(torch.nn.Module):
     def __init__(self, in_channel, out_channel, act=None):
         super().__init__()
-        self.linear = torch.nnLinear(in_channel, out_channel, bias=False)
-        self.bn   = torch.nnBatchNorm1d(out_channel,eps=1e-05, momentum=0.1)
+        self.linear = torch.nn.Linear(in_channel, out_channel, bias=False)
+        self.bn   = torch.nn.BatchNorm1d(out_channel,eps=1e-05, momentum=0.1)
         self.act  = act
 
     def forward(self, x):
@@ -145,20 +145,20 @@ class GraphConv(torch.nn.Module):
     def __init__(self, node_dim, edge_dim ):
         super().__init__()
 
-        self.encoder = torch.nnSequential(
+        self.encoder = torch.nn.Sequential(
             LinearBn(edge_dim, 256),
-            torch.nnReLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             LinearBn(256, 256),
-            torch.nnReLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             LinearBn(256, 128),
-            torch.nnReLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             LinearBn(128, node_dim * node_dim),
-            #torch.nnReLU(inplace=True),
+            #torch.nn.ReLU(inplace=True),
         )
 
 
-        self.gru  = torch.nnGRU(node_dim, node_dim, batch_first=False, bidirectional=False)
-        self.bias = torch.nnParameter(torch.Tensor(node_dim))
+        self.gru  = torch.nn.GRU(node_dim, node_dim, batch_first=False, bidirectional=False)
+        self.bias = torch.nn.Parameter(torch.Tensor(node_dim))
         self.bias.data.uniform_(-1.0 / math.sqrt(node_dim), 1.0 / math.sqrt(node_dim))
 
 
@@ -232,11 +232,11 @@ class HengNet(torch.nn.Module):
         self.num_propagate = 6
         self.num_s2s = 6
 
-        self.preprocess = torch.nnSequential(
+        self.preprocess = torch.nn.Sequential(
             LinearBn(node_dim, 128),
-            torch.nnReLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             LinearBn(128, 128),
-            torch.nnReLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
         )
 
         self.propagate = GraphConv(128, edge_dim)
@@ -244,12 +244,12 @@ class HengNet(torch.nn.Module):
 
 
         #predict coupling constant
-        self.predict = torch.nnSequential(
+        self.predict = torch.nn.Sequential(
             LinearBn(4*128, 1024),  #node_hidden_dim
-            torch.nnReLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             LinearBn( 1024, 512),
-            torch.nnReLU(inplace=True),
-            torch.nnLinear(512, num_target),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(512, num_target),
         )
 
     def forward(self, data):

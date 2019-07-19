@@ -1,12 +1,17 @@
 from xyz2mol import MolFromXYZ
 import itertools
 from collections import defaultdict
-from rdkit import Chem
 
 import pandas as pd
 import numpy as np
 import os
 import multiprocessing
+
+from rdkit import Chem
+from rdkit.Chem import ChemicalFeatures
+from rdkit import RDConfig
+from sklearn import preprocessing
+
 
 
 SYMBOLS=['H', 'C', 'N', 'O', 'F']
@@ -33,10 +38,21 @@ def one_hot_encoding(x, set):
 
 def structure_to_graph(structure_file):
     mol, smile = MolFromXYZ(structure_file)
+    factory = ChemicalFeatures.BuildFeatureFactory(os.path.join(RDConfig.RDDataDir, 'BaseFeatures.fdef'))
+    feature = factory.GetFeaturesForMol(mol)
+
+    structure = pd.read_csv(structure_file, skiprows=1, header=None, sep=" ",
+                            names=["atom", "x", "y", "z"])
+    structure["radius"] = structure["atom"].map({'H': 0.38, 'C': 0.77, 'N': 0.75, 'O': 0.73, 'F': 0.71})
+    xyz = structure["x", "y", "z"]
+    norm_xyz = preprocessing.normalize(xyz, norm='l2')
 
     n_atoms = mol.GetNumAtoms()
     edge_array = []
     bond_features = []
+    distance = []
+    rel_distance = []
+    angle = []
 
     for i, j in itertools.product(range(n_atoms), repeat=2):
         if i == j:
@@ -49,9 +65,28 @@ def structure_to_graph(structure_file):
         else:
             bond_type = None
         bond_features.append(one_hot_encoding(bond_type, BONDS))
+        r = ((xyz.iloc[i] - xyz.iloc[j])**2).sum()**0.5
+        distance.append([r])
+        rel_distance.append([r/(structure.iloc[i]["radius"] +
+                                structure.iloc[j]["radius"])])  # divide distance by sum of atomic radii
+        angle.append([(norm_xyz.iloc[i]*norm_xyz.iloc[j]).sum()])
 
     edge_array = np.array(edge_array).T
-    edge_features = np.array(bond_features)
+    edge_features = np.concatenate([
+        np.array(bond_features),
+        one_hot_encoding(
+            np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8]),
+            range(6)
+        ),
+        one_hot_encoding(
+            np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8]),
+            range(6)
+        ),
+        one_hot_encoding(
+            np.digitize(np.array(angle), bins=[-1, -.6, -.2, .2, .6]),
+            range(6)
+        )
+    ], axis=1)
 
     atom_features = defaultdict(list)
 
@@ -66,9 +101,21 @@ def structure_to_graph(structure_file):
         atom_features["num_h"].append([atom.GetTotalNumHs(includeNeighbors=True)])
         atom_features["atomic"].append([atom.GetAtomicNum()])
 
+    acceptor = np.zeros((n_atoms, 1), np.uint8)
+    donor = np.zeros((n_atoms, 1), np.uint8)
+
+    for feat in feature:
+        if feat.GetFamily() == 'Donor':
+            for i in feat.GetAtomIds():
+                donor[i] = 1
+        elif feat.GetFamily() == 'Acceptor':
+            for i in feat.GetAtomIds():
+                acceptor[i] = 1
+
     atom_features = np.concatenate([atom_features["symbol"], atom_features["aromatic"],
                                     atom_features["hybridization"], atom_features["num_h"],
-                                    atom_features["atomic"]], axis=1)
+                                    atom_features["atomic"],
+                                    acceptor, donor], axis=1)
 
     return edge_array, edge_features, atom_features, smile
 

@@ -141,50 +141,6 @@ class LinearBn(torch.nn.Module):
         return x
 
 
-class GraphConv(torch.nn.Module):
-    def __init__(self, node_dim, edge_dim ):
-        super().__init__()
-
-        self.encoder = torch.nn.Sequential(
-            LinearBn(edge_dim, 256),
-            torch.nn.ReLU(inplace=True),
-            LinearBn(256, 256),
-            torch.nn.ReLU(inplace=True),
-            LinearBn(256, 128),
-            torch.nn.ReLU(inplace=True),
-            LinearBn(128, node_dim * node_dim),
-            #torch.nn.ReLU(inplace=True),
-        )
-
-
-        self.gru  = torch.nn.GRU(node_dim, node_dim, batch_first=False, bidirectional=False)
-        self.bias = torch.nn.Parameter(torch.Tensor(node_dim))
-        self.bias.data.uniform_(-1.0 / math.sqrt(node_dim), 1.0 / math.sqrt(node_dim))
-
-
-    def forward(self, node, edge_index, edge, hidden):
-        num_node, node_dim = node.shape
-        num_edge, edge_dim = edge.shape
-        edge_index = edge_index.t().contiguous()
-
-        #1. message :  m_j = SUM_i f(n_i, n_j, e_ij)  where i is neighbour(j)
-        x_i     = torch.index_select(node, 0, edge_index[0])
-        edge    = self.encoder(edge).view(-1,node_dim,node_dim)
-        #message = x_i.view(-1,node_dim,1)*edge
-        #message = message.sum(1)
-        message = x_i.view(-1,1,node_dim)@edge
-        message = message.view(-1,node_dim)
-        message = scatter_('mean', message, edge_index[1], dim_size=num_node)
-        message = F.relu(message +self.bias)
-
-        #2. update: n_j = f(n_j, m_j)
-        update = message
-
-        #batch_first=True
-        update, hidden = self.gru(update.view(1,-1,node_dim), hidden)
-        update = update.view(-1,node_dim)
-
-        return update, hidden
 
 class Set2Set(torch.torch.nn.Module):
 
@@ -225,9 +181,8 @@ class Set2Set(torch.torch.nn.Module):
         return q_star
 
 
-
 class HengNet(torch.nn.Module):
-    def __init__(self, node_dim=13, edge_dim=5, num_target=8):
+    def __init__(self, node_dim, dim, num_target=8, edge_dim=4):
         super().__init__()
         self.num_propagate = 6
         self.num_s2s = 6
@@ -239,7 +194,20 @@ class HengNet(torch.nn.Module):
             torch.nn.ReLU(inplace=True),
         )
 
-        self.propagate = GraphConv(128, edge_dim)
+        encoder = torch.nn.Sequential(
+            LinearBn(edge_dim, 256),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(256, 256),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(256, 128),
+            torch.nn.ReLU(inplace=True),
+            LinearBn(128, node_dim * node_dim),
+            #torch.nn.ReLU(inplace=True),
+        )
+
+        self.conv = nn.NNConv(dim, dim, encoder, aggr='mean', root_weight=False)
+        self.gru = GRU(dim, dim)
+
         self.set2set = Set2Set(128, processing_step=self.num_s2s)
 
 
@@ -247,7 +215,7 @@ class HengNet(torch.nn.Module):
         self.predict = torch.nn.Sequential(
             LinearBn(4*128, 1024),  #node_hidden_dim
             torch.nn.ReLU(inplace=True),
-            LinearBn( 1024, 512),
+            LinearBn(1024, 512),
             torch.nn.ReLU(inplace=True),
             torch.nn.Linear(512, num_target),
         )
@@ -257,7 +225,9 @@ class HengNet(torch.nn.Module):
         h = out.unsqueeze(0)
 
         for i in range(3):
-            out, h = self.propagate(out, data.edge_index, data.edge_attr, h)
+            m = F.relu(self.conv(out, data.edge_index, data.edge_attr))
+            out, h = self.gru(m.unsqueeze(0), h)
+            out = out.squeeze(0)
 
         # out is now an atom-level representation
         # now need to run a dense layer over (atom1, atom2) pairs

@@ -22,9 +22,7 @@ std = (sum2/nonzero - mean**2)**0.5
 print(mean, std)
 dataset.data.y = (dataset.data.y - mean) / std
 
-# Split datasets.
-val_dataset = dataset[::10]
-train_dataset = dataset[[i for i in range(len(dataset)) if i % 10 != 0]]
+train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset)-10000, 10000])
 
 train_loader = DataLoader(
     train_dataset, batch_size=64,
@@ -36,7 +34,7 @@ val_loader = DataLoader(
     val_dataset, batch_size=64,
     num_workers=2,
     pin_memory=True,
-    shuffle=False
+    shuffle=True
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

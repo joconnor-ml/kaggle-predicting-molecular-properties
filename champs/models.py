@@ -9,19 +9,19 @@ class Net(torch.nn.Module):
         super().__init__()
         self.preprocess = Sequential(
             Linear(num_features, dim),
-            LayerNorm(dim),
+            BatchNorm1d(dim),
             ReLU(),
             Linear(dim, dim),
-            LayerNorm(dim),
+            BatchNorm1d(dim),
             ReLU(),
         )
 
         enc = Sequential(
             Linear(4, dim),
-            LayerNorm(dim),
+            BatchNorm1d(dim),
             ReLU(),
             Linear(dim, dim * dim),
-            LayerNorm(dim * dim),
+            BatchNorm1d(dim * dim),
         )
         self.conv = nn.NNConv(dim, dim, enc, aggr='mean', root_weight=False)
         self.gru = Sequential(

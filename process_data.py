@@ -142,13 +142,7 @@ def structure_to_graph(structure_file):
 def process_multiple(data_file, structure_dir, output_dir, test=False):
     train = pd.read_csv(data_file)
     class_counts = train.groupby("type")["id"].count()
-    class_counts = class_counts / claACSF_GENERATOR = ACSF(
-    species = SYMBOL,
-    rcut = 6.0,
-    g2_params=[[1, 1], [1, 2], [1, 3]],
-    g4_params=[[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]],
-)
-ss_counts.mean()
+    class_counts = class_counts / class_counts.mean()
     class_weight_map = (1 / class_counts).to_dict()
 
     molecule_names = train["molecule_name"].unique()

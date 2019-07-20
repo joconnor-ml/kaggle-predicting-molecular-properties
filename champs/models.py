@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm
+from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm, Squeeze
 from torch_geometric import nn
 
 
@@ -26,6 +26,7 @@ class Net(torch.nn.Module):
         self.conv = nn.NNConv(dim, dim, enc, aggr='mean', root_weight=False)
         self.gru = Sequential(
             GRU(dim, dim),
+            Squeeze(0),
             LayerNorm(dim),
         )
 
@@ -47,7 +48,6 @@ class Net(torch.nn.Module):
         for i in range(3):
             m = F.relu(self.conv(out, data.edge_index, data.edge_attr))
             out, h = self.gru(m.unsqueeze(0), h)
-            out = out.squeeze(0)
 
         # mol_s2s = torch.index_select(self.set2set(out, data.batch), dim=0, index=data.batch)
         # print(out.shape)

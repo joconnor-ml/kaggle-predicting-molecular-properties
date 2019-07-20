@@ -45,7 +45,11 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
             target_matrix = np.zeros((targets.shape[0], 8), dtype=np.float32)
             target_matrix[np.arange(target_classes.shape[0]), target_classes] = targets
 
-            dx, dy, dz = edge_features[: -3], edge_features[: -2], edge_features[: -1]
+            dx = edge_features[: -3]
+            dy = edge_features[: -3]
+            dz = edge_features[: -3]
+
+            print(dx.shape, dy.shape, dz.shape)
             r = (dx**2 + dy**2 + dz**2)**0.5
             phi = np.acos(dz / r)
             theta = np.atan2(dx, dy)

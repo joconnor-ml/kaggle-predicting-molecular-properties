@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from champs.datasets import ChampsDataset
+from champs.datasets import ChampsDatasetMultiTarget
 from champs.models import Net
 from torch_geometric.data import DataLoader
 import torch.nn.functional as F
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     target = 0
     dim = 64
 
-    dataset = ChampsDataset("./data/")
+    dataset = ChampsDatasetMultiTarget("./data/")
 
     # Split datasets.
     test_dataset = dataset[::5]

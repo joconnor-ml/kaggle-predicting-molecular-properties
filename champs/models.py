@@ -4,6 +4,19 @@ from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm, Sque
 from torch_geometric import nn
 
 
+class NormGRU(torch.nn.Module):
+    def __init__(self, in_dim, out_dim):
+        super().__init__()
+        self.gru = GRU(in_dim, out_dim)
+        self.norm = LayerNorm(out_dim)
+
+    def forward(self, m, h):
+        out, h = self.gru(m.unsqueeze(0), h)
+        out = out.squeeze(0)
+        out = self.norm(out)
+        return out, h
+
+
 class Net(torch.nn.Module):
     def __init__(self, num_node_features, num_edge_features, dim, n_outputs=8):
         super().__init__()
@@ -24,11 +37,7 @@ class Net(torch.nn.Module):
             BatchNorm1d(dim * dim),
         )
         self.conv = nn.NNConv(dim, dim, enc, aggr='mean', root_weight=False)
-        self.gru = Sequential(
-            GRU(dim, dim),
-            Squeeze(0),
-            LayerNorm(dim),
-        )
+        self.gru = NormGRU(dim, dim)
 
         self.set2set = nn.Set2Set(dim, processing_steps=3)
         self.predict = Sequential(
@@ -47,7 +56,7 @@ class Net(torch.nn.Module):
 
         for i in range(3):
             m = F.relu(self.conv(out, data.edge_index, data.edge_attr))
-            out, h = self.gru(m.unsqueeze(0), h)
+            out, h = self.gru(m, h)
 
         # mol_s2s = torch.index_select(self.set2set(out, data.batch), dim=0, index=data.batch)
         # print(out.shape)

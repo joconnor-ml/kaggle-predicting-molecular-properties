@@ -9,7 +9,7 @@ import torch
 
 dim = 64
 
-dataset = ChampsSampleDatasetMultiTarget("./data/")
+dataset = ChampsDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
 sum = dataset.data.y.sum(dim=0)
 sum2 = (dataset.data.y ** 2).sum(dim=0)

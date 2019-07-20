@@ -3,11 +3,12 @@ sys.path.append("..")
 from champs.datasets import ChampsSampleDatasetMultiTarget
 from champs.models import Net
 from torch_geometric.data import DataLoader
-import torch.nn.functional as F
 import torch
+import numpy as np
 
 
-dim = 32
+
+dim = 64
 
 dataset = ChampsSampleDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
@@ -21,18 +22,19 @@ std = (sum2/nonzero - mean**2)**0.5
 print(mean, std)
 dataset.data.y = (dataset.data.y - mean) / std
 
-# Split datasets.
-val_dataset = dataset
-train_dataset = dataset
+train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset)-10000, 10000])
+
 train_loader = DataLoader(
-    train_dataset, batch_size=8,
+    train_dataset, batch_size=4,
     num_workers=2,
     pin_memory=True,
+    shuffle=True
 )
 val_loader = DataLoader(
-    val_dataset, batch_size=8,
+    val_dataset, batch_size=4,
     num_workers=2,
     pin_memory=True,
+    shuffle=True
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -52,13 +54,15 @@ def log_mae(predict, truth):
     return score
 
 
-def mae(predict, truth, target_class):
+def mae(predict, truth, target_class, eval_class=None):
     y = torch.gather(truth, 1, target_class.view(-1, 1)).squeeze(-1)
     predict = predict.view(-1)
     y = y.view(-1)
 
     score = torch.abs(predict-y)
-    score = score.sum()
+    if eval_class is not None:
+        score = score[target_class == eval_class] * std[eval_class]
+    score = score.mean()
     return score
 
 
@@ -96,21 +100,36 @@ def test(loader):
     return error / len(loader.dataset)
 
 
+def test_one(loader, eval_class):
+    model.eval()
+    error = 0
+
+    for data in loader:
+        data = data.to(device)
+        error += mae(model(data), data.y, data.target_class, eval_class=eval_class).item()
+    return error / len(loader.dataset)
+
+
 best_val_error = None
 for epoch in range(1, 501):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
-    val_error = test(val_loader)
-    scheduler.step(val_error)
-    print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation MAE: {:.7f}'.format(epoch, lr, loss, val_error))
 
     # if 0:
-    if epoch % 10 == 0:
-        torch.save(model.state_dict(), './checkpoint/multiscale2.{:04d}_model.pth'.format(epoch))
+    if epoch % 10 == 1:
+        val_error = test(val_loader)
+        val_errors = [np.log(test_one(val_loader, i))
+                      for i in range(8)]
+
+        scheduler.step(val_error)
+        print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation score: {:.7f}'.format(epoch, lr, loss, val_error))
+        print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in range(8)]))
+
+        torch.save(model.state_dict(), './checkpoint/bondnet.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,
             'val_loss': val_error,
-        }, './checkpoint/sample.{:04d}_optimizer.pth'.format(epoch))
+        }, './checkpoint/bondnet.{:04d}_optimizer.pth'.format(epoch))
 
 print(mean, std)

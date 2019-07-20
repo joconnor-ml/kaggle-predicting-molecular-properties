@@ -106,6 +106,14 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
             target_matrix = np.zeros((targets.shape[0], 8), dtype=np.float32)
             target_matrix[np.arange(target_classes.shape[0]), target_classes] = targets
 
+            xd = edge_features[:, -3]
+            yd = edge_features[:, -2]
+            zd = edge_features[:, -1]
+            r = (xd**2 + yd**2 + xd**2) ** 0.5
+            phi = np.acos(zd/r)
+            theta = np.atan2(xd, yd)
+            edge_features = np.concatenate([edge_features, phi.reshape(-1,1), theta.reshape(-1,1)], axis=1)
+
             row = Data(
                 x=torch.from_numpy(atom_features).float(),
                 edge_index=torch.from_numpy(edge_array).long(),

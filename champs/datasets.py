@@ -50,8 +50,8 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
             phi = np.acos(dz / r)
             theta = np.atan2(dx, dy)
             edge_features = np.concatenate([edge_features,
-                                            phi.reshape(-1, -1),
-                                            theta.reshape(-1, -1)], axis=-1)
+                                            phi.reshape(-1, 1),
+                                            theta.reshape(-1, 1)], axis=-1)
 
             row = Data(
                 x=torch.from_numpy(atom_features).float(),

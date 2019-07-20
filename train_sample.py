@@ -42,7 +42,8 @@ val_loader = DataLoader(
     pin_memory=True,
 )
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cpu")
 model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

@@ -13,7 +13,7 @@ class NormGRU(torch.nn.Module):
     def forward(self, m, h):
         out, h = self.gru(m.unsqueeze(0), h)
         out = out.squeeze(0)
-        #out = self.norm(out)
+        out = self.norm(out)
         return out, h
 
 

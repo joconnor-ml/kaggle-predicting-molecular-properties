@@ -49,7 +49,6 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
             dy = edge_features[:, -2]
             dz = edge_features[:, -1]
 
-            print(dx.shape, dy.shape, dz.shape, edge_features.shape)
             r = (dx**2 + dy**2 + dz**2)**0.5
             phi = np.arccos(dz / r)
             theta = np.arctan2(dx, dy)

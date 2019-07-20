@@ -26,9 +26,10 @@ if __name__ == "__main__":
     test_loader = DataLoader(
         test_dataset, batch_size=64,
         num_workers=2,
+        pin_memory=True
     )
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(args.device)
     model = Net(test_dataset.num_features, dim).to(device)
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)

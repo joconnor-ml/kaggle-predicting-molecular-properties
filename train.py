@@ -6,7 +6,7 @@ from torch_geometric.data import DataLoader
 import torch
 import numpy as np
 
-
+torch.manual_seed(0)  # for reproducabibilites
 
 dim = 64
 
@@ -87,7 +87,7 @@ def train(epoch):
         loss.backward()
         loss_all += loss.item()
         optimizer.step()
-    return loss_all / len(train_loader.dataset)
+    return loss_all / len(train_loader)  # divide by number of batches
 
 
 def test(loader):
@@ -97,7 +97,7 @@ def test(loader):
     for data in loader:
         data = data.to(device)
         error += mae(model(data), data.y, data.target_class).item()
-    return error / len(loader.dataset)
+    return error / len(loader)  # divide by number of batches
 
 
 def test_one(loader, eval_class):
@@ -107,7 +107,7 @@ def test_one(loader, eval_class):
     for data in loader:
         data = data.to(device)
         error += mae(model(data), data.y, data.target_class, eval_class=eval_class).item()
-    return error / len(loader.dataset)
+    return error / len(loader)  # divide by number of batches
 
 
 best_val_error = None

@@ -23,14 +23,22 @@ if __name__ == "__main__":
 
     dataset = ChampsDatasetMultiTarget("./data/")
 
-    # Split datasets.
-    test_dataset = dataset[::5]
-    test_loader = DataLoader(
-        test_dataset, batch_size=64,
+    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset) - 10000, 10000])
+
+    train_loader = DataLoader(
+        train_dataset, batch_size=64,
         num_workers=2,
+        pin_memory=True,
+        shuffle=True
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=64,
+        num_workers=2,
+        pin_memory=True,
+        shuffle=True
     )
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(args.device)
     model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim).to(device)
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)
@@ -45,7 +53,7 @@ if __name__ == "__main__":
 
         return np.concatenate(preds)
 
-    preds = test(test_loader)
+    preds = test(val_loader)
     preds = pd.Series(preds)
     print(preds.head())
     preds.to_csv(args.outfile)

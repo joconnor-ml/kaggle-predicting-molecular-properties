@@ -33,7 +33,8 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
         id = list(csv_file["molecule_name"].unique())
 
         data_list = []
-        for molecule_name in id:
+        for i, molecule_name in enumerate(id):
+            if i % 10000 == 0: print(i)
             edge_array = np.load(os.path.join(self.graph_dir, "{}.edge_array.npy".format(molecule_name)))
             edge_features = np.load(os.path.join(self.graph_dir, "{}.edge_features.npy".format(molecule_name)))
             atom_features = np.load(os.path.join(self.graph_dir, "{}.atom_features.npy".format(molecule_name)))

@@ -12,15 +12,18 @@ from rdkit.Chem import ChemicalFeatures
 from rdkit import RDConfig
 from sklearn import preprocessing
 
-
+from dscribe.descriptors import ACSF
+from dscribe.core.system import System
 
 SYMBOLS=['H', 'C', 'N', 'O', 'F']
+
 BONDS = [
     Chem.rdchem.BondType.SINGLE,
     Chem.rdchem.BondType.DOUBLE,
     Chem.rdchem.BondType.TRIPLE,
     Chem.rdchem.BondType.AROMATIC,
 ]
+
 HYBRIDIZATIONS=[
     #Chem.rdchem.HybridizationType.S,
     Chem.rdchem.HybridizationType.SP,
@@ -30,13 +33,21 @@ HYBRIDIZATIONS=[
     #Chem.rdchem.HybridizationType.SP3D2,
 ]
 
+ACSF_GENERATOR = ACSF(
+    species = SYMBOLS,
+    rcut = 6.0,
+    g2_params=[[1, 1], [1, 2], [1, 3]],
+    g4_params=[[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]],
+)
+
+
 
 def one_hot_encoding(x, set):
     one_hot = [int(x == s) for s in set]
     return one_hot
 
-def one_hot_numpy(x):
-    b = np.zeros((x.shape[0], x.max()+1))
+def one_hot_numpy(x, width):
+    b = np.zeros((x.shape[0], width))
     b[np.arange(x.shape[0]), x] = 1
     return b
 
@@ -79,15 +90,15 @@ def structure_to_graph(structure_file):
         rel_distance.append([rel_dist])  # divide distance by sum of atomic radii
         angle.append([theta])
 
-    distance = np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8])
-    rel_distance = np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8])
-    angle = np.digitize(np.array(angle), bins=[-1, -.6, -.2, .2, .6])
+    #distance = np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8])
+    #rel_distance = np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8])
+    #angle = np.digitize(np.array(angle), bins=[-1, -.6, -.2, .2, .6])
 
     edge_array = np.array(edge_array).T
     edge_features = np.concatenate([
         np.array(bond_features),
-        one_hot_numpy(distance),
-        one_hot_numpy(rel_distance),
+        np.array(distance) / 4 - 1,
+        np.array(rel_distance) / 4 - 1,
         np.array(angle)  # absolute bond angle. Can use to calculate dihedral angles
     ], axis=1)
 
@@ -104,6 +115,11 @@ def structure_to_graph(structure_file):
         atom_features["num_h"].append([atom.GetTotalNumHs(includeNeighbors=True)])
         atom_features["atomic"].append([atom.GetAtomicNum()])
 
+    atom = System(symbols=structure["atom"].values, positions=xyz.values)
+    acsf = ACSF_GENERATOR.create(atom)
+    atom_features["acsf"] = [acsf]
+
+
     acceptor = np.zeros((n_atoms, 1), np.uint8)
     donor = np.zeros((n_atoms, 1), np.uint8)
 
@@ -117,16 +133,22 @@ def structure_to_graph(structure_file):
 
     atom_features = np.concatenate([atom_features["symbol"], atom_features["aromatic"],
                                     atom_features["hybridization"], atom_features["num_h"],
-                                    atom_features["atomic"],
+                                    atom_features["atomic"], atom_features["acsf"],
                                     acceptor, donor], axis=1)
 
-    return edge_array, edge_features, atom_features, smile
+    return edge_array, edge_features, atom_features, smile, xyz.values
 
 
 def process_multiple(data_file, structure_dir, output_dir, test=False):
     train = pd.read_csv(data_file)
     class_counts = train.groupby("type")["id"].count()
-    class_counts = class_counts / class_counts.mean()
+    class_counts = class_counts / claACSF_GENERATOR = ACSF(
+    species = SYMBOL,
+    rcut = 6.0,
+    g2_params=[[1, 1], [1, 2], [1, 3]],
+    g4_params=[[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]],
+)
+ss_counts.mean()
     class_weight_map = (1 / class_counts).to_dict()
 
     molecule_names = train["molecule_name"].unique()
@@ -163,7 +185,7 @@ def process_multiple(data_file, structure_dir, output_dir, test=False):
     with open("{}/smiles.txt".format(output_dir), "wt") as f:
         f.writelines([smile+"\n" for edge_array, edge_features, atom_features, smile in results])
 
-    for (edge_array, edge_features, atom_features, smile), targets, target_index, target_class, target_weight, molecule_name in \
+    for (edge_array, edge_features, atom_features, smile, xyz), targets, target_index, target_class, target_weight, molecule_name in \
             zip(results, targets, target_indices, target_classes, target_weights, molecule_names):
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_array.npy"), edge_array)
         np.save(os.path.join(output_dir, f"{molecule_name}.edge_features.npy"), edge_features)
@@ -172,6 +194,7 @@ def process_multiple(data_file, structure_dir, output_dir, test=False):
         np.save(os.path.join(output_dir, f"{molecule_name}.target_indices.npy"), target_index)
         np.save(os.path.join(output_dir, f"{molecule_name}.target_class.npy"), target_class)
         np.save(os.path.join(output_dir, f"{molecule_name}.target_weight.npy"), target_weight)
+        np.save(os.path.join(output_dir, f"{molecule_name}.xyz.npy"), xyz)
 
 
 if __name__ == "__main__":

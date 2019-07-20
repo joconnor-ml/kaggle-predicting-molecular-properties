@@ -74,7 +74,7 @@ class ChampsDataset(Dataset):
         if 1:
             atom = System(symbols =graph.axyz[0], positions=graph.axyz[1])
             acsf = ACSF_GENERATOR.create(atom)
-            graph.node += [acsf,]
+            graph.node += [acsf]
 
 
         # if 1:

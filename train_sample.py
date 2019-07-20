@@ -22,7 +22,7 @@ std = (sum2/nonzero - mean**2)**0.5
 print(mean, std)
 dataset.data.y = (dataset.data.y - mean) / std
 
-train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset)-10000, 10000])
+train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset)-10, 10])
 
 train_loader = DataLoader(
     train_dataset, batch_size=4,

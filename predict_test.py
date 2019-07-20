@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
 
     device = torch.device(args.device)
-    model = Net(test_dataset.num_features, dim).to(device)
+    model = Net(test_dataset.num_features, test_dataset[0].edge_attr.shape[-1], dim).to(device)
     checkpoint = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint)
 

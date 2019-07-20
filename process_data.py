@@ -70,6 +70,7 @@ def structure_to_graph(structure_file):
     distance = []
     rel_distance = []
     angle = []
+    bond_vector = []
 
     for i, j in itertools.product(range(n_atoms), repeat=2):
         if i == j:
@@ -89,6 +90,7 @@ def structure_to_graph(structure_file):
         distance.append([r])
         rel_distance.append([rel_dist])  # divide distance by sum of atomic radii
         angle.append([theta])
+        bond_vector.append((xyz.iloc[i] - xyz.iloc[j]).tolist())
 
     #distance = np.digitize(np.array(distance), bins=[0, 1, 2, 4, 8])
     #rel_distance = np.digitize(np.array(rel_distance), bins=[0, 1, 2, 4, 8])
@@ -99,7 +101,8 @@ def structure_to_graph(structure_file):
         np.array(bond_features),
         np.array(distance) / 4 - 1,
         np.array(rel_distance) / 4 - 1,
-        np.array(angle)  # absolute bond angle. Can use to calculate dihedral angles
+        np.array(angle),  # absolute bond angle. Can use to calculate dihedral angles
+        np.array(bond_vector)  # difference between coords of atoms i and j
     ], axis=1)
 
     atom_features = defaultdict(list)

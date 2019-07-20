@@ -70,6 +70,7 @@ class Net(torch.nn.Module):
         node1 = torch.index_select(out, dim=0, index=atom1.view(-1))
 
         print(data.batch.shape, data.target_batch_index.shape)
+        print(data.batch.max(), data.target_batch_index.max())
         s2s = self.set2set(out, data.batch)
         s2s0 = torch.index_select(s2s, dim=0, index=data.target_batch_index)
         print(s2s.shape, s2s0.shape, node0.shape, node1.shape)

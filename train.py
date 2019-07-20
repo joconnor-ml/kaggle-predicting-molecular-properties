@@ -1,36 +1,29 @@
 import sys
 sys.path.append("..")
-from champs.datasets import ChampsDataset, ChampsDatasetMultiTarget
+from champs.datasets import ChampsSampleDatasetMultiTarget
 from champs.models import Net
 from torch_geometric.data import DataLoader
 import torch.nn.functional as F
 import torch
 
 
-dim = 32
+dim = 64
 
-dataset = ChampsDatasetMultiTarget("./data/")
+dataset = ChampsSampleDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
 sum = dataset.data.y.sum(dim=0)
-print(sum)
 sum2 = (dataset.data.y ** 2).sum(dim=0)
-print(sum2)
 nonzero = (dataset.data.y != 0).sum(dim=0).float()
-print(nonzero)
 mean = sum / nonzero
-print(mean)
 std = (sum2/nonzero - mean**2)**0.5
-print(std)
 
 
 print(mean, std)
-print(dataset[0].y)
 dataset.data.y = (dataset.data.y - mean) / std
-print(dataset[0].y)
 
 # Split datasets.
-val_dataset = dataset[::5]
-train_dataset = dataset[1::5]
+val_dataset = dataset[::10]
+train_dataset = dataset[1::10]
 train_loader = DataLoader(
     train_dataset, batch_size=64,
     num_workers=2,
@@ -43,7 +36,7 @@ val_loader = DataLoader(
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Net(dataset.num_features, dim).to(device)
+model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)
@@ -113,9 +106,11 @@ for epoch in range(1, 501):
 
     # if 0:
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), './checkpoint/multiscale2.{:04d}_model.pth'.format(epoch))
+        torch.save(model.state_dict(), './checkpoint/bondnet.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,
             'val_loss': val_error,
-        }, './checkpoint/multiscale2.{:04d}_optimizer.pth'.format(epoch))
+        }, './checkpoint/bondnet.{:04d}_optimizer.pth'.format(epoch))
+
+print(mean, std)

@@ -120,7 +120,7 @@ def structure_to_graph(structure_file):
 
     atom = System(symbols=structure["atom"].values, positions=xyz.values)
     acsf = ACSF_GENERATOR.create(atom)
-    atom_features["acsf"] = [acsf]
+    atom_features["acsf"] = acsf
 
 
     acceptor = np.zeros((n_atoms, 1), np.uint8)
@@ -134,6 +134,7 @@ def structure_to_graph(structure_file):
             for i in feat.GetAtomIds():
                 acceptor[i] = 1
 
+    print(len(atom_features["acsf"]), len(acceptor), len(donor))
     atom_features = np.concatenate([atom_features["symbol"], atom_features["aromatic"],
                                     atom_features["hybridization"], atom_features["num_h"],
                                     atom_features["atomic"], atom_features["acsf"],

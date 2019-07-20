@@ -133,7 +133,6 @@ class ChampsTestDataset(ChampsDatasetMultiTarget):
                 edge_index=torch.from_numpy(edge_array).long(),
                 edge_attr=torch.from_numpy(edge_features).float(),
                 target_index=torch.from_numpy(target_indices).long(),
-                target_batch_index=torch.from_numpy(np.zeros_like(targets)).long(),
                 target_class=torch.from_numpy(target_classes).long(),
                 target_weight=torch.from_numpy(target_weights).float(),
                 num_nodes=atom_features.shape[0]

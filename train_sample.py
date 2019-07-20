@@ -12,21 +12,14 @@ dim = 32
 dataset = ChampsSampleDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
 sum = dataset.data.y.sum(dim=0)
-print(sum)
 sum2 = (dataset.data.y ** 2).sum(dim=0)
-print(sum2)
 nonzero = (dataset.data.y != 0).sum(dim=0).float()
-print(nonzero)
 mean = sum / nonzero
-print(mean)
 std = (sum2/nonzero - mean**2)**0.5
-print(std)
 
 
 print(mean, std)
-print(dataset[0].y)
 dataset.data.y = (dataset.data.y - mean) / std
-print(dataset[0].y)
 
 # Split datasets.
 val_dataset = dataset
@@ -42,8 +35,7 @@ val_loader = DataLoader(
     pin_memory=True,
 )
 
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device("cpu")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -120,3 +112,5 @@ for epoch in range(1, 501):
             'epoch': epoch,
             'val_loss': val_error,
         }, './checkpoint/multiscale2.{:04d}_optimizer.pth'.format(epoch))
+
+print(mean, std)

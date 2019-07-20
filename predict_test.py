@@ -14,7 +14,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('checkpoint_file', type=str)
+    parser.add_argument("checkpoint_file", type=str)
+    parser.add_argument("--device", "-d", type=str)
     args = parser.parse_args()
 
     target = 0

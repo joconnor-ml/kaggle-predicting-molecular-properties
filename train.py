@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from champs.datasets import ChampsSampleDatasetMultiTarget
+from champs.datasets import ChampsDatasetMultiTarget
 from champs.models import Net
 from torch_geometric.data import DataLoader
 import torch.nn.functional as F

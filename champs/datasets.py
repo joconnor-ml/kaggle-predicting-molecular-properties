@@ -45,9 +45,9 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
             target_matrix = np.zeros((targets.shape[0], 8), dtype=np.float32)
             target_matrix[np.arange(target_classes.shape[0]), target_classes] = targets
 
-            dx = edge_features[: -3]
-            dy = edge_features[: -2]
-            dz = edge_features[: -1]
+            dx = edge_features[:, -3]
+            dy = edge_features[:, -2]
+            dz = edge_features[:, -1]
 
             print(dx.shape, dy.shape, dz.shape, edge_features.shape)
             r = (dx**2 + dy**2 + dz**2)**0.5

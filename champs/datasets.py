@@ -51,8 +51,8 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
 
             print(dx.shape, dy.shape, dz.shape)
             r = (dx**2 + dy**2 + dz**2)**0.5
-            phi = np.acos(dz / r)
-            theta = np.atan2(dx, dy)
+            phi = np.arccos(dz / r)
+            theta = np.arctan2(dx, dy)
             edge_features = np.concatenate([edge_features,
                                             phi.reshape(-1, 1),
                                             theta.reshape(-1, 1)], axis=-1)

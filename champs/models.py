@@ -5,10 +5,10 @@ from torch_geometric import nn
 
 
 class Net(torch.nn.Module):
-    def __init__(self, num_features, dim, n_outputs=8):
+    def __init__(self, num_node_features, num_edge_features, dim, n_outputs=8):
         super().__init__()
         self.preprocess = Sequential(
-            Linear(num_features, dim),
+            Linear(num_node_features, dim),
             BatchNorm1d(dim),
             ReLU(),
             Linear(dim, dim),
@@ -17,7 +17,7 @@ class Net(torch.nn.Module):
         )
 
         enc = Sequential(
-            Linear(4, dim),
+            Linear(num_edge_features, dim),
             BatchNorm1d(dim),
             ReLU(),
             Linear(dim, dim * dim),

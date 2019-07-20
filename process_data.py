@@ -181,7 +181,7 @@ def process_multiple(data_file, structure_dir, output_dir, test=False):
                       for molecule_name in molecule_names]
 
     with open("{}/smiles.txt".format(output_dir), "wt") as f:
-        f.writelines([smile+"\n" for edge_array, edge_features, atom_features, smile in results])
+        f.writelines([r[0]+"\n" for r in results])
 
     for (edge_array, edge_features, atom_features, smile, xyz), targets, target_index, target_class, target_weight, molecule_name in \
             zip(results, targets, target_indices, target_classes, target_weights, molecule_names):

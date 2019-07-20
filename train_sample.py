@@ -111,6 +111,6 @@ for epoch in range(1, 501):
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,
             'val_loss': val_error,
-        }, './checkpoint/multiscale2.{:04d}_optimizer.pth'.format(epoch))
+        }, './checkpoint/sample.{:04d}_optimizer.pth'.format(epoch))
 
 print(mean, std)

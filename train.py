@@ -3,8 +3,9 @@ sys.path.append("..")
 from champs.datasets import ChampsDatasetMultiTarget
 from champs.models import Net
 from torch_geometric.data import DataLoader
-import torch.nn.functional as F
 import torch
+import numpy as np
+
 
 
 dim = 64
@@ -23,16 +24,19 @@ dataset.data.y = (dataset.data.y - mean) / std
 
 # Split datasets.
 val_dataset = dataset[::10]
-train_dataset = dataset[1::10]
+train_dataset = dataset[[i for i in range(len(dataset)) if i % 10 != 0]]
+
 train_loader = DataLoader(
     train_dataset, batch_size=64,
     num_workers=2,
     pin_memory=True,
+    shuffle=True
 )
 val_loader = DataLoader(
     val_dataset, batch_size=64,
     num_workers=2,
     pin_memory=True,
+    shuffle=False
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -112,18 +116,17 @@ best_val_error = None
 for epoch in range(1, 501):
     lr = scheduler.optimizer.param_groups[0]['lr']
     loss = train(epoch)
-    val_error = test(val_loader)
-    val_error0 = test_one(val_loader, 0)
-    val_error1 = test_one(val_loader, 1)
-
-    scheduler.step(val_error)
-    print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation MAE: {:.7f}, {:.7f}, {:.7f}'.format(epoch, lr, loss,
-                                                                                                  val_error,
-                                                                                                  val_error0,
-                                                                                                  val_error1))
 
     # if 0:
-    if epoch % 10 == 0:
+    if epoch % 10 == 1:
+        val_error = test(val_loader)
+        val_errors = [np.log(test_one(val_loader, i))
+                      for i in range(8)]
+
+        scheduler.step(val_error)
+        print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation score: {:.7f}'.format(epoch, lr, loss, val_error))
+        print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in range(8)]))
+
         torch.save(model.state_dict(), './checkpoint/bondnet.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),

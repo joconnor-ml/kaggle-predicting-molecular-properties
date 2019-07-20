@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm, Squeeze
+from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm
 from torch_geometric import nn
 
 

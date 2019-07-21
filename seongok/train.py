@@ -55,6 +55,7 @@ def training(model, FLAGS, modelName):
 
             mae = 0
             mse = 0
+            train_loss = 0
 
             st = time.time()
             for _iter in range(num_batches):
@@ -65,18 +66,16 @@ def training(model, FLAGS, modelName):
                 mask_batch = _mask[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 std_batch = _stds[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 mean_batch = _means[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
-                if total_iter % 25 != 0:
-                    # Training
-                    cost = model.train(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
-                    if total_iter % 25 == 24:
-                        print("train_iter : ", total_iter, ", epoch : ", epoch, ", cost :  ", cost)
 
-                elif total_iter % 25 == 0:
+                # Training
+                train_loss += model.train(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
+
+                if total_iter % 100 == 0:
                     # Test accuracy
                     Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
                     mse += (np.sum(np.power((((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch), 2))/ np.sum(mask_batch))
                     mae += (np.sum(np.abs(((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch)) / np.sum(mask_batch))
-                    print("epoch MSE : ", mse * 25 / (_iter + 1), "\t epoch MAE : ", mae * 25 / (_iter + 1))
+                    print("train loss:", train_loss/(_iter+1), "val MSE : ", mse * 25 / (_iter + 1), "\t val MAE : ", mae * 25 / (_iter + 1))
 
                 if total_iter % save_every == 0:
                     # Save network! 

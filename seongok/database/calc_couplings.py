@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 
 train = pd.read_csv("../../data/csv/train.csv")
+print(train["atom_index_1"].max())
 molecule_names = train["molecule_name"].unique()
 
 grps = train.groupby("molecule_name")
+
 masks = []
 targets = []
 for i, mol in molecule_names:

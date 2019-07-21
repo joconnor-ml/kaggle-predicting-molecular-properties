@@ -76,11 +76,11 @@ class Graph2Property():
         return self._P, self.loss
 
     def train(self, A, X, P, mask):
-        opt, loss = self.sess.run([self.opt, self.loss], feed_dict={self.A: A, self.X: X, self.P: P, self.mask: mask})
+        opt, loss = self.sess.run([self.opt, self.loss], feed_dict={self.A: A, self.X: X, self.P: P, self.target_mask: mask})
         return loss
 
     def test(self, A, X, P, mask):
-        _P, loss = self.sess.run([self._P, self.loss], feed_dict={self.A: A, self.X: X, self.P: P, self.mask: mask})
+        _P, loss = self.sess.run([self._P, self.loss], feed_dict={self.A: A, self.X: X, self.P: P, self.target_mask: mask})
         return _P, loss
 
     def predict(self, A, X):

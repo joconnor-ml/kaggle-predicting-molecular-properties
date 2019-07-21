@@ -65,8 +65,8 @@ def training(model, FLAGS, modelName):
                     Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch)
                     print("test_iter : ", total_iter, ", epoch : ", epoch, ", cost :  ", cost)
                     if (total_iter % 100 == 0):
-                        mse = (np.mean(np.power((Y.flatten() - P_batch), 2)))
-                        mae = (np.mean(np.abs(Y.flatten() - P_batch)))
+                        mse = (np.mean(np.power((Y.flatten() - P_batch)*mask_batch, 2)))
+                        mae = (np.mean(np.abs(Y.flatten() - P_batch)*mask_batch))
                         print("MSE : ", mse, "\t MAE : ", mae)
 
                 if total_iter % save_every == 0:

@@ -49,11 +49,12 @@ def training(model, FLAGS, modelName):
         # Learning rate scheduling 
         model.assign_lr(learning_rate * (decay_rate ** epoch))
 
-        mae = 0
-        mse = 0
         for i in range(0, num_DB):
             _graph, _property, _mask, _stds, _means = loadInputs(FLAGS, i, modelName, unitLen)
             num_batches = int(_graph[0].shape[0] / batch_size)
+
+            mae = 0
+            mse = 0
 
             st = time.time()
             for _iter in range(num_batches):
@@ -72,12 +73,9 @@ def training(model, FLAGS, modelName):
                 elif total_iter % 5 == 0:
                     # Test accuracy
                     Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
-                    print("test_iter : ", total_iter, ", epoch : ", epoch, ", cost :  ", cost)
-                    if (total_iter % 100 == 0):
-                        print("epoch MSE : ", mse/(_iter+1), "\t epoch MAE : ", mae/(_iter+1))
-
-                mse += (np.sum(np.power((((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch), 2))/ np.sum(mask_batch))
-                mae += (np.sum(np.abs(((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch)) / np.sum(mask_batch))
+                    mse += (np.sum(np.power((((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch), 2))/ np.sum(mask_batch))
+                    mae += (np.sum(np.abs(((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch)) / np.sum(mask_batch))
+                    print("epoch MSE : ", mse * 5 / (_iter + 1), "\t epoch MAE : ", mae * 5 / (_iter + 1))
 
                 if total_iter % save_every == 0:
                     # Save network! 

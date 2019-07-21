@@ -83,10 +83,6 @@ def training(model, FLAGS, modelName):
                     ckpt_path = 'save/' + modelName + '.ckpt'
                     model.save(ckpt_path, total_iter)
 
-            et = time.time()
-            print("time : ", et - st)
-            st = time.time()
-
     total_et = time.time()
     print("Finish training! Total required time for training : ", (total_et - total_st))
     return

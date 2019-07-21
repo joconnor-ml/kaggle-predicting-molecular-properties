@@ -89,15 +89,9 @@ epoch_size = int(sys.argv[4])
 learning_rate = float(sys.argv[5])
 decay_rate = float(sys.argv[6])
 
-database = ''
-if (prop in ['TPSA2', 'logP', 'SAS']):
-    database = 'ZINC'
-    numDB = 45
-    unit_len = 10000
-elif (prop == 'pve'):
-    database = 'CEP'
-    numDB = 27
-    unit_len = 1000
+database = "CHAMPS"
+numDB = 30
+unit_len = 10000
 
 print('method :', method, '\t prop :', prop, '\t num_layer :', num_layer, '\t epoch_size :', epoch_size,
       '\t learning_rate :', learning_rate, '\t decay_rate :', decay_rate, '\t Database :', database, '\t num_DB :',
@@ -110,7 +104,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('model', method, 'GCN, GCN+a, GCN+g, GCN+a+g')
 flags.DEFINE_string('output', prop, '')
 flags.DEFINE_string('loss_type', 'MSE', 'Options : MSE, CrossEntropy, Hinge')  ### Using MSE  
-flags.DEFINE_string('database', database, 'Options : ZINC, ZINC2')  ### Using MSEr 
+flags.DEFINE_string('database', database, 'Options : CHAMPS')  ### Using MSEr
 flags.DEFINE_string('optimizer', 'Adam', 'Options : Adam, SGD, RMSProp')
 flags.DEFINE_string('readout', 'atomwise', 'Options : atomwise, graph_gather')
 flags.DEFINE_integer('latent_dim', 512, 'Dimension of a latent vector for autoencoder')

@@ -45,7 +45,7 @@ def process(mol):
     target[df["atom_index_0"].values, df["atom_index_1"].values] = df["scalar_coupling_constant"]
 
     mean = np.zeros((30,30), dtype=np.uint8)
-    std = np.zeros((30,30), dtype=np.uint8)
+    std = np.ones((30,30), dtype=np.uint8)
     for type in type_means:
         std[df[df["type"] == type]["atom_index_0"].values, df[df["type"] == type]["atom_index_1"].values] = type_stds[type]
         mean[df[df["type"] == type]["atom_index_0"].values, df[df["type"] == type]["atom_index_1"].values] = type_means[type]

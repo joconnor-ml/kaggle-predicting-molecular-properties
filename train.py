@@ -8,7 +8,7 @@ import numpy as np
 
 torch.manual_seed(0)  # for reproducabibilites
 
-dim = 128
+dim = 64
 
 dataset = ChampsDatasetMultiTarget("./data/")
 # Normalize targets to mean = 0 and std = 1.
@@ -38,7 +38,7 @@ val_loader = DataLoader(
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim, processing_steps=5).to(device)
+model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim, processing_steps=3).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)

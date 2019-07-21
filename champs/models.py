@@ -4,6 +4,71 @@ from torch.nn import Sequential, Linear, ReLU, GRU, BatchNorm1d, LayerNorm
 from torch_geometric import nn
 
 
+
+import torch
+from torch.nn import Parameter
+from torch_geometric.nn.conv import MessagePassing
+
+from ..inits import reset, uniform
+
+
+class GatedEdgeConv(MessagePassing):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 nn,
+                 aggr='add',
+                 bias=True,
+                 **kwargs):
+        super().__init__(aggr=aggr, **kwargs)
+
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.nn = nn
+        self.aggr = aggr
+        self.lin0 = Linear(self.out_channels, 32, bias=False)
+        self.lin1 = Linear(self.out_channels, 32, bias=True)
+
+        if bias:
+            self.bias = Parameter(torch.Tensor(out_channels))
+        else:
+            self.register_parameter('bias', None)
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        reset(self.nn)
+        uniform(self.in_channels, self.bias)
+
+
+    def forward(self, x, edge_index, edge_attr):
+        """"""
+        x = x.unsqueeze(-1) if x.dim() == 1 else x
+        pseudo = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
+        return self.propagate(edge_index, x=x, pseudo=pseudo)
+
+    def get_gate_coeff(self, x0, x1):
+        x0 = self.lin0(x0)
+        x1 = self.lin1(x1)
+        return F.sigmoid(x0 + x1)
+
+    def message(self, x_j0, pseudo):
+        weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
+        x_j1 = torch.matmul(x_j0.unsqueeze(1), weight).squeeze(1)
+        # add gated skip:
+        coeff = self.get_gate_coeff(x_j0, x_j1)
+        return x_j0 * coeff + x_j1 * (1.0 - coeff)
+
+    def update(self, aggr_out, x):
+        if self.bias is not None:
+            aggr_out = aggr_out + self.bias
+        return aggr_out
+
+    def __repr__(self):
+        return '{}({}, {})'.format(self.__class__.__name__, self.in_channels,
+                                   self.out_channels)
+
+
 class NormGRU(torch.nn.Module):
     def __init__(self, in_dim, out_dim):
         super().__init__()
@@ -39,7 +104,7 @@ class Net(torch.nn.Module):
             Linear(dim, dim * dim),
             BatchNorm1d(dim * dim),
         )
-        self.conv = nn.NNConv(dim, dim, enc, aggr='mean', root_weight=False)
+        self.conv = GatedEdgeConv(dim, dim, enc, aggr='mean')
         self.gru = NormGRU(dim, dim)
 
         self.set2set = nn.Set2Set(dim, processing_steps=self.processing_steps)

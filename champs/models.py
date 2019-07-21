@@ -70,14 +70,15 @@ class GatedEdgeConv(MessagePassing):
         x1 = self.lin1(x1)
         return F.sigmoid(x0 + x1)
 
-    def message(self, x_j0, pseudo):
-        print(x_j0.shape)
+    def message(self, x_j, pseudo):
+        print(pseudo.shape)
+        print(x_j.shape)
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
-        x_j1 = torch.matmul(x_j0.unsqueeze(1), weight).squeeze(1)
+        x_j1 = torch.matmul(x_j.unsqueeze(1), weight).squeeze(1)
         print(x_j1.shape)
         # add gated skip:
-        coeff = self.get_gate_coeff(x_j0, x_j1)
-        out = x_j0 * coeff + x_j1 * (1.0 - coeff)
+        coeff = self.get_gate_coeff(x_j, x_j1)
+        out = x_j * coeff + x_j1 * (1.0 - coeff)
         print(out.shape)
         return out
 

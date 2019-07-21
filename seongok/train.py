@@ -99,7 +99,7 @@ learning_rate = float(sys.argv[5])
 decay_rate = float(sys.argv[6])
 
 database = "CHAMPS"
-numDB = 30
+numDB = 9
 unit_len = 10000
 
 print('method :', method, '\t prop :', prop, '\t num_layer :', num_layer, '\t epoch_size :', epoch_size,

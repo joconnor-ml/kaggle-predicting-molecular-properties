@@ -74,9 +74,10 @@ def training(model, FLAGS, modelName):
                     Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
                     print("test_iter : ", total_iter, ", epoch : ", epoch, ", cost :  ", cost)
                     if (total_iter % 100 == 0):
-                        mse += (np.sum(np.power((((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch), 2))/ np.sum(mask_batch))
-                        mae += (np.sum(np.abs(((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch)) / np.sum(mask_batch))
                         print("epoch MSE : ", mse/(_iter+1), "\t epoch MAE : ", mae/(_iter+1))
+
+                mse += (np.sum(np.power((((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch), 2))/ np.sum(mask_batch))
+                mae += (np.sum(np.abs(((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch)) / np.sum(mask_batch))
 
                 if total_iter % save_every == 0:
                     # Save network! 

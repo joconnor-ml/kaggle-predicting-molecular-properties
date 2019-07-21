@@ -45,6 +45,12 @@ def training(model, FLAGS, modelName):
     total_st = time.time()
     print("Start Training XD")
     for epoch in range(num_epochs):
+
+        epoch_iter = 0
+        mae = 0
+        mse = 0
+        train_loss = 0
+
         # Learning rate scheduling 
         model.assign_lr(learning_rate * (decay_rate ** epoch))
 
@@ -52,13 +58,10 @@ def training(model, FLAGS, modelName):
             _graph, _property, _mask, _stds, _means = loadInputs(FLAGS, i, modelName, unitLen)
             num_batches = int(_graph[0].shape[0] / batch_size)
 
-            mae = 0
-            mse = 0
-            train_loss = 0
-
             st = time.time()
             for _iter in range(num_batches):
                 total_iter += 1
+                epoch_iter += 1
                 A_batch = _graph[0][_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 X_batch = _graph[1][_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 P_batch = _property[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
@@ -67,7 +70,7 @@ def training(model, FLAGS, modelName):
                 mean_batch = _means[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
 
                 # Training
-                if total_iter % 100 != 0:
+                if A_batch % 100 != 0:
                     train_loss += model.train(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
 
                 else:
@@ -75,7 +78,7 @@ def training(model, FLAGS, modelName):
                     Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
                     mse += (np.sum(np.power((((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch), 2))/ np.sum(mask_batch))
                     mae += (np.sum(np.abs(((P_batch - mean_batch) / std_batch) - Y[:, :, :, 0]*mask_batch)) / np.sum(mask_batch))
-                    print("train loss:", train_loss/(_iter*0.99), "val MSE : ", mse * 25 / (_iter + 1), "\t val MAE : ", mae * 25 / (_iter + 1))
+                    print("train loss:", train_loss/(epoch_iter*0.99), "val MSE : ", mse * 100 / (epoch_iter + 1), "\t val MAE : ", mae * 100 / (epoch_iter + 1))
 
                 if total_iter % save_every == 0:
                     # Save network! 

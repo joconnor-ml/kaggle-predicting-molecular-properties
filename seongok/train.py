@@ -24,7 +24,7 @@ def loadInputs(FLAGS, idx, modelName, unitLen):
     masks = (
         np.load('./database/' + FLAGS.database + '/' + FLAGS.output + '.mask.npy')[idx * unitLen:(idx + 1) * unitLen]
     ).astype(float)
-    print(masks.shape)
+    print(masks.shape, targets.shape)
 
     return retInput, targets, masks
 

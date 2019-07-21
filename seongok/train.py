@@ -11,7 +11,6 @@ np.set_printoptions(precision=3)
 
 
 def loadInputs(FLAGS, idx, modelName, unitLen):
-    print(FLAGS.database)
     adj = None
     features = None
     adj = np.load('./database/' + FLAGS.database + '/adj/' + str(idx) + '.npy')

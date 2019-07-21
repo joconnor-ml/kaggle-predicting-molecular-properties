@@ -11,6 +11,8 @@ class Graph2Property():
         self.X = tf.placeholder("float64", shape=[self.batch_size, 30, 23])
         self.P = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
         self.target_mask = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
+        self.target_std = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
+        self.target_mean = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
 
         self.create_network()
 
@@ -37,7 +39,7 @@ class Graph2Property():
 
         self.Z, self._P = blocks.readout_edgewise(self._X, latent_dim)
 
-        self.loss = self.calLoss(self.P, self._P, self.target_mask)
+        self.loss = self.calLoss(self.P, self._P, self.target_mask, self.target_std, self.target_mean)
 
         self.lr = tf.Variable(0.0, trainable=False)
         self.opt = self.optimizer(self.lr, self.FLAGS.optimizer)
@@ -49,7 +51,7 @@ class Graph2Property():
         tf.train.start_queue_runners(sess=self.sess)
         print("Network Ready")
 
-    def calLoss(self, P, _P, mask):
+    def calLoss(self, P, _P, mask, std, mean):
         batch_size = int(P.get_shape()[0])
         P = tf.reshape(P, [batch_size, -1])
         P = tf.cast(P, tf.float64)
@@ -57,7 +59,7 @@ class Graph2Property():
         _P = tf.cast(_P, tf.float64)
         mask = tf.reshape(mask, [batch_size, -1])
         mask = tf.cast(mask, tf.float64)
-        loss = tf.reduce_sum(tf.pow((P - _P)*mask, 2)) / tf.reduce_sum(mask)
+        loss = tf.reduce_sum(tf.pow(((P/std)-mean - _P*mask), 2)) / tf.reduce_sum(mask)
 
         return loss
 

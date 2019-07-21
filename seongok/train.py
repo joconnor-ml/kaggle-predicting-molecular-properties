@@ -24,9 +24,14 @@ def loadInputs(FLAGS, idx, modelName, unitLen):
     masks = (
         np.load('./database/' + FLAGS.database + '/' + FLAGS.output + '.mask.npy')[idx * unitLen:(idx + 1) * unitLen]
     ).astype(float)
-    print(masks.shape, targets.shape)
+    stds = (
+        np.load('./database/' + FLAGS.database + '/' + FLAGS.output + '.std.npy')[idx * unitLen:(idx + 1) * unitLen]
+    ).astype(float)
+    means = (
+        np.load('./database/' + FLAGS.database + '/' + FLAGS.output + '.mean.npy')[idx * unitLen:(idx + 1) * unitLen]
+    ).astype(float)
 
-    return retInput, targets, masks
+    return retInput, targets, masks, stds, means
 
 
 def training(model, FLAGS, modelName):
@@ -45,7 +50,7 @@ def training(model, FLAGS, modelName):
         model.assign_lr(learning_rate * (decay_rate ** epoch))
 
         for i in range(0, num_DB):
-            _graph, _property, _mask = loadInputs(FLAGS, i, modelName, unitLen)
+            _graph, _property, _mask, _stds, _means = loadInputs(FLAGS, i, modelName, unitLen)
             num_batches = int(_graph[0].shape[0] / batch_size)
 
             st = time.time()
@@ -55,18 +60,20 @@ def training(model, FLAGS, modelName):
                 X_batch = _graph[1][_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 P_batch = _property[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 mask_batch = _mask[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
+                std_batch = _stds[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
+                mean_batch = _means[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
                 if total_iter % 5 != 0:
                     # Training
-                    cost = model.train(A_batch, X_batch, P_batch, mask_batch)
+                    cost = model.train(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
                     print("train_iter : ", total_iter, ", epoch : ", epoch, ", cost :  ", cost)
 
                 elif total_iter % 5 == 0:
                     # Test accuracy
-                    Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch)
+                    Y, cost = model.test(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
                     print("test_iter : ", total_iter, ", epoch : ", epoch, ", cost :  ", cost)
                     if (total_iter % 100 == 0):
-                        mse = (np.mean(np.power((Y.flatten() - P_batch)*mask_batch, 2)))
-                        mae = (np.mean(np.abs(Y.flatten() - P_batch)*mask_batch))
+                        mse = (np.mean(np.power((Y.flatten()/std_batch - mean_batch - P_batch*mask_batch), 2)))
+                        mae = (np.mean(np.abs(Y.flatten()/std_batch - mean_batch - P_batch*mask_batch)))
                         print("MSE : ", mse, "\t MAE : ", mae)
 
                 if total_iter % save_every == 0:

@@ -62,6 +62,7 @@ class GatedEdgeConv(MessagePassing):
         """"""
         x = x.unsqueeze(-1) if x.dim() == 1 else x
         pseudo = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
+        print(x.shape)
         return self.propagate(edge_index, x=x, pseudo=pseudo)
 
     def get_gate_coeff(self, x0, x1):

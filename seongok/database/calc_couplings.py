@@ -4,10 +4,11 @@ import pandas as pd
 train = pd.read_csv("../../data/csv/train.csv")
 molecule_names = train["molecule_name"].unique()
 
+grps = train.groupby("molecule_name")
 masks = []
 targets = []
 for mol in molecule_names:
-    df = train[train["molecule_name"] == mol]
+    df = grps.get_group(mol)
     mask = np.zeros((50,50), dtype=np.uint8)
     mask[df["atom_index_0"].values, df["atom_index_1"].values] = 1
     masks.append(mask)

@@ -1,14 +1,7 @@
 import numpy as np
-from rdkit import Chem
-from rdkit.Chem.QED import qed
-from rdkit.Chem.Descriptors import ExactMolWt
-from rdkit.Chem.Crippen import MolLogP
-from rdkit.Chem.rdMolDescriptors import CalcTPSA
-from rdkit.Contrib.SA_Score.sascorer import calculateScore
-import sys
 import pandas as pd
 
-train = pd.read_csv(data_file)
+train = pd.read_csv("../../data/csv/train.csv")
 molecule_names = train["molecule_name"].unique()
 
 masks = []

@@ -319,8 +319,9 @@ def readout_edgewise(X, latent_size):
     # Graph Embedding in order to satisfy invariance under permutation
     Z = tf.einsum('ijk,kl->ijl', edge_representation, weight['mlp_f1']) + tf.reshape(
         tf.tile(bias['mlp_f1'], [num_edges]), [num_edges, hidden_dim[1]])
+    print(Z.shape)
+
     Z = tf.nn.relu(Z)
-    Z = tf.nn.sigmoid(tf.reduce_sum(Z, 1))
 
     # Predict the molecular property
     _Y = tf.nn.tanh(tf.nn.xw_plus_b(Z, weight['mlp_f2'], bias['mlp_f2']))

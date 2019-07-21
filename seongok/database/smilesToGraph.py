@@ -24,7 +24,7 @@ def convertToGraph(smiles_list, k):
     adj = []
     adj_norm = []
     features = []
-    maxNumAtoms = 50
+    maxNumAtoms = 30
     for i in smiles_list:
         # Mol
         iMol = Chem.MolFromSmiles(i.strip())

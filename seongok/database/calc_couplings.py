@@ -12,10 +12,10 @@ grps = train.groupby("molecule_name")
 
 def process(mol):
     df = grps.get_group(mol)
-    mask = np.zeros((50,50), dtype=np.uint8)
+    mask = np.zeros((30,30), dtype=np.uint8)
     mask[df["atom_index_0"].values, df["atom_index_1"].values] = 1
 
-    target = np.zeros((50,50), dtype=np.float32)
+    target = np.zeros((30,30), dtype=np.float32)
     target[df["atom_index_0"].values, df["atom_index_1"].values] = df["scalar_coupling_constant"]
     return target, mask
 

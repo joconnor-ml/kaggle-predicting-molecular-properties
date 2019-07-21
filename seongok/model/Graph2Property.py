@@ -7,10 +7,10 @@ class Graph2Property():
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
         self.batch_size = FLAGS.batch_size
-        self.A = tf.placeholder("float64", shape=[self.batch_size, 50, 50])
-        self.X = tf.placeholder("float64", shape=[self.batch_size, 50, 24])
-        self.P = tf.placeholder("float64", shape=[self.batch_size, 50, 50])
-        self.target_mask = tf.placeholder("float64", shape=[self.batch_size, 50, 50])
+        self.A = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
+        self.X = tf.placeholder("float64", shape=[self.batch_size, 30, 24])
+        self.P = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
+        self.target_mask = tf.placeholder("float64", shape=[self.batch_size, 30, 30])
 
         self.create_network()
 

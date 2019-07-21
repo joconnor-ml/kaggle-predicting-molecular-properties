@@ -8,6 +8,26 @@ from torch_geometric import nn
 import torch
 from torch.nn import Parameter
 from torch_geometric.nn.conv import MessagePassing
+import math
+
+
+def uniform(size, tensor):
+    bound = 1.0 / math.sqrt(size)
+    if tensor is not None:
+        tensor.data.uniform_(-bound, bound)
+
+
+def reset(nn):
+    def _reset(item):
+        if hasattr(item, 'reset_parameters'):
+            item.reset_parameters()
+
+    if nn is not None:
+        if hasattr(nn, 'children') and len(list(nn.children())) > 0:
+            for item in nn.children():
+                _reset(item)
+        else:
+            _reset(nn)
 
 
 class GatedEdgeConv(MessagePassing):
@@ -32,6 +52,13 @@ class GatedEdgeConv(MessagePassing):
         else:
             self.register_parameter('bias', None)
 
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        reset(self.nn)
+        uniform(self.in_channels, self.root)
+        uniform(self.in_channels, self.bias)
+
     def forward(self, x, edge_index, edge_attr):
         """"""
         x = x.unsqueeze(-1) if x.dim() == 1 else x
@@ -44,11 +71,16 @@ class GatedEdgeConv(MessagePassing):
         return F.sigmoid(x0 + x1)
 
     def message(self, x_j0, pseudo):
+        print(x_j0.shape)
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
         x_j1 = torch.matmul(x_j0.unsqueeze(1), weight).squeeze(1)
+        print(x_j1.shape)
         # add gated skip:
         coeff = self.get_gate_coeff(x_j0, x_j1)
-        return x_j0 * coeff + x_j1 * (1.0 - coeff)
+        out = x_j0 * coeff + x_j1 * (1.0 - coeff)
+        print(out.shape)
+        return out
+
 
     def update(self, aggr_out, x):
         if self.bias is not None:

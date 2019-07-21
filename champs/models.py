@@ -9,7 +9,7 @@ import torch
 from torch.nn import Parameter
 from torch_geometric.nn.conv import MessagePassing
 
-from ..inits import reset, uniform
+from torch_geometric.inits import reset, uniform
 
 
 class GatedEdgeConv(MessagePassing):

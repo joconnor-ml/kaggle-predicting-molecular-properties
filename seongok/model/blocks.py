@@ -323,8 +323,7 @@ def readout_edgewise(X, latent_size):
     Z = tf.nn.sigmoid(tf.reduce_sum(Z, 1))
 
     # Predict the molecular property
-    _Y = tf.nn.relu(tf.nn.xw_plus_b(Z, weight['mlp_f1'], bias['mlp_f1']))
-    _Y = tf.nn.tanh(tf.nn.xw_plus_b(_Y, weight['mlp_f2'], bias['mlp_f2']))
+    _Y = tf.nn.tanh(tf.nn.xw_plus_b(Z, weight['mlp_f2'], bias['mlp_f2']))
     _Y = tf.nn.xw_plus_b(_Y, weight['mlp_f3'], bias['mlp_f3'])
     _Y = tf.reshape(_Y, shape=[-1, num_atoms, num_atoms, hidden_dim[3]])  # reshape to match target matrix
 

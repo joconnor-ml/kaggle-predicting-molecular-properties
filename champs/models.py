@@ -56,7 +56,6 @@ class GatedEdgeConv(MessagePassing):
 
     def reset_parameters(self):
         reset(self.nn)
-        uniform(self.in_channels, self.root)
         uniform(self.in_channels, self.bias)
 
     def forward(self, x, edge_index, edge_attr):

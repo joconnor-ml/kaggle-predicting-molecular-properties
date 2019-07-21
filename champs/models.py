@@ -18,8 +18,11 @@ class NormGRU(torch.nn.Module):
 
 
 class Net(torch.nn.Module):
-    def __init__(self, num_node_features, num_edge_features, dim, n_outputs=8):
+    def __init__(self, num_node_features, num_edge_features, dim, n_outputs=8, processing_steps=3):
         super().__init__()
+
+        self.processing_steps = processing_steps
+
         self.preprocess = Sequential(
             Linear(num_node_features, dim),
             BatchNorm1d(dim),
@@ -39,7 +42,7 @@ class Net(torch.nn.Module):
         self.conv = nn.NNConv(dim, dim, enc, aggr='mean', root_weight=False)
         self.gru = NormGRU(dim, dim)
 
-        self.set2set = nn.Set2Set(dim, processing_steps=3)
+        self.set2set = nn.Set2Set(dim, processing_steps=self.processing_steps)
         self.predict = Sequential(
             Linear(4 * dim, 4 * dim),
             LayerNorm(4 * dim),
@@ -54,7 +57,7 @@ class Net(torch.nn.Module):
         out = self.preprocess(data.x)
         h = out.unsqueeze(0)
 
-        for i in range(3):
+        for i in range(self.processing_steps):
             m = F.relu(self.conv(out, data.edge_index, data.edge_attr))
             out, h = self.gru(m, h)
 

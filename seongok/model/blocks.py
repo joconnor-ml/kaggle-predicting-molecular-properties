@@ -280,7 +280,7 @@ def readout_edgewise(X, latent_size):
         'mlp_f0': tf.get_variable("fw0", initializer=tf.contrib.layers.xavier_initializer(),
                                   shape=[feature_size, hidden_dim[0]], dtype=tf.float64),
         'mlp_f1': tf.get_variable("fw1", initializer=tf.contrib.layers.xavier_initializer(),
-                                  shape=[hidden_dim[0], hidden_dim[1]], dtype=tf.float64),
+                                  shape=[hidden_dim[0]*2, hidden_dim[1]], dtype=tf.float64),
         'mlp_f2': tf.get_variable("fw2", initializer=tf.contrib.layers.xavier_initializer(),
                                   shape=[hidden_dim[1], hidden_dim[2]], dtype=tf.float64),
         'mlp_f3': tf.get_variable("fw3", initializer=tf.contrib.layers.xavier_initializer(),
@@ -305,10 +305,14 @@ def readout_edgewise(X, latent_size):
     # edge_representation.shape = [num_atoms, num_atoms, hidden_dim]
 
     # now let's combine into edge representation
+    # here we're taking the cartesian product -- every possible pairing of atom0, atom1:
     atom1 = tf.tile(atom_representation, [1, num_atoms, 1])
-    atom2 = tf.reshape(tf.tile(tf.expand_dims(atom_representation, axis=-1), [1, 1, 1, num_atoms]), shape=[-1, num_atoms*num_atoms, hidden_dim[0]])
+    atom2 = tf.reshape(tf.tile(tf.expand_dims(atom_representation, axis=-1), [1, 1, 1, num_atoms]),
+                       shape=[-1, num_atoms*num_atoms, hidden_dim[0]])
 
+    print(atom1.shape, atom2.shape)
     edge_representation = tf.concat([atom1, atom2], -1)
+    print(edge_representation.shape)
 
     # TODO: could add explicit edge features here?
 

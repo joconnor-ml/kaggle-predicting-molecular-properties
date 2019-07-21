@@ -70,7 +70,7 @@ def training(model, FLAGS, modelName):
                 mean_batch = _means[_iter * FLAGS.batch_size:(_iter + 1) * FLAGS.batch_size]
 
                 # Training
-                if A_batch % 100 != 0:
+                if epoch_iter % 100 != 0:
                     train_loss += model.train(A_batch, X_batch, P_batch, mask_batch, std_batch, mean_batch)
 
                 else:

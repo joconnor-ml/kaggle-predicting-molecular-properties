@@ -64,7 +64,7 @@ class Graph2Property():
         mean = tf.reshape(mean, [batch_size, -1])
         mean = tf.cast(mean, tf.float64)
         scaled_y = ((P - mean) / std)
-        loss = tf.reduce_sum(tf.pow((scaled_y - _P*mask), 2)) / tf.reduce_sum(mask)
+        loss = tf.reduce_sum(tf.abs((scaled_y - _P*mask))) / tf.reduce_sum(mask)
 
         return loss
 

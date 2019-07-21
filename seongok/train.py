@@ -11,6 +11,7 @@ np.set_printoptions(precision=3)
 
 
 def loadInputs(FLAGS, idx, modelName, unitLen):
+    print(FLAGS.database)
     adj = None
     features = None
     adj = np.load('./database/' + FLAGS.database + '/adj/' + str(idx) + '.npy')
@@ -23,6 +24,7 @@ def loadInputs(FLAGS, idx, modelName, unitLen):
     masks = (
         np.load('./database/' + FLAGS.database + '/' + FLAGS.output + '.mask.npy')[idx * unitLen:(idx + 1) * unitLen]
     ).astype(float)
+    print(masks.shape)
 
     return retInput, targets, masks
 

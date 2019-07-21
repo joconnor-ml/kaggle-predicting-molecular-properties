@@ -306,7 +306,7 @@ def readout_edgewise(X, latent_size):
 
     # now let's combine into edge representation
     atom1 = tf.tile(atom_representation, [1, num_atoms, 1])
-    atom2 = tf.reshape(tf.tile(tf.expand_dims(atom_representation, axis=-1), [1, 1, 1, num_atoms]), shape=[-1])
+    atom2 = tf.reshape(tf.tile(tf.expand_dims(atom_representation, axis=-1), [1, 1, 1, num_atoms]), shape=[-1, num_atoms*num_atoms, hidden_dim[0]])
 
     edge_representation = tf.concat([atom1, atom2], -1)
 

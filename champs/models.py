@@ -9,7 +9,7 @@ import torch
 from torch.nn import Parameter
 from torch_geometric.nn.conv import MessagePassing
 
-from torch_geometric.inits import reset, uniform
+from torch_geometric.nn.init import reset, uniform
 
 
 class GatedEdgeConv(MessagePassing):
@@ -33,13 +33,6 @@ class GatedEdgeConv(MessagePassing):
             self.bias = Parameter(torch.Tensor(out_channels))
         else:
             self.register_parameter('bias', None)
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        reset(self.nn)
-        uniform(self.in_channels, self.bias)
-
 
     def forward(self, x, edge_index, edge_attr):
         """"""

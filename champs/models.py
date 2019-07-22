@@ -47,6 +47,8 @@ class GatedEdgeConv(MessagePassing):
         self.lin0 = Linear(self.out_channels, 32, bias=False)
         self.lin1 = Linear(self.out_channels, 32, bias=True)
 
+        self.register_parameter('root', None)
+
         if bias:
             self.bias = Parameter(torch.Tensor(out_channels))
         else:
@@ -56,13 +58,13 @@ class GatedEdgeConv(MessagePassing):
 
     def reset_parameters(self):
         reset(self.nn)
+        uniform(self.in_channels, self.root)
         uniform(self.in_channels, self.bias)
 
     def forward(self, x, edge_index, edge_attr):
         """"""
         x = x.unsqueeze(-1) if x.dim() == 1 else x
         pseudo = edge_attr.unsqueeze(-1) if edge_attr.dim() == 1 else edge_attr
-        print(x.shape)
         return self.propagate(edge_index, x=x, pseudo=pseudo)
 
     def get_gate_coeff(self, x0, x1):
@@ -70,17 +72,17 @@ class GatedEdgeConv(MessagePassing):
         x1 = self.lin1(x1)
         return F.sigmoid(x0 + x1)
 
+    def gated_skip_connection(self, x0, x1):
+        coeff = self.get_gate_coeff(x0, x1)
+        return x0 * coeff + x1 * (1.0 - coeff)
+
+
     def message(self, x_j, pseudo):
-        print(pseudo.shape)
-        print(x_j.shape)
+        # from NNConv:
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
         x_j1 = torch.matmul(x_j.unsqueeze(1), weight).squeeze(1)
-        print(x_j1.shape)
-        # add gated skip:
-        coeff = self.get_gate_coeff(x_j, x_j1)
-        out = x_j * coeff + x_j1 * (1.0 - coeff)
-        print(out.shape)
-        return out
+        # now add gated skip connection:
+        return self.gated_skip_connection(x_j, x_j1)
 
 
     def update(self, aggr_out, x):

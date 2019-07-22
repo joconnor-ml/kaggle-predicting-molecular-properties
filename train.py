@@ -90,6 +90,21 @@ def train(epoch):
     return loss_all / len(train_loader)  # divide by number of batches
 
 
+def train_subset(epoch, target_classes):
+    # TODO -- train one model each for 1J, 2J and 3J couplings -- the underlying interactions appear quite different (especially 1J)
+    model.train()
+    loss_all = 0
+
+    for data in train_loader:
+        data = data.to(device)
+        optimizer.zero_grad()
+        loss = mae(model(data), data.y, data.target_class)
+        loss.backward()
+        loss_all += loss.item()
+        optimizer.step()
+    return loss_all / len(train_loader)  # divide by number of batches
+
+
 def test(loader):
     model.eval()
     error = 0

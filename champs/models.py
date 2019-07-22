@@ -44,8 +44,8 @@ class GatedEdgeConv(MessagePassing):
         self.out_channels = out_channels
         self.nn = nn
         self.aggr = aggr
-        self.lin0 = Linear(self.out_channels, out_channels, bias=False)
-        self.lin1 = Linear(self.out_channels, out_channels, bias=True)
+        self.lin0 = Linear(self.out_channels, self.out_channels, bias=False)
+        self.lin1 = Linear(self.out_channels, self.out_channels, bias=True)
 
         self.register_parameter('root', None)
 

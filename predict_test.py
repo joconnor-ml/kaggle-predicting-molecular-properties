@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint_file", type=str)
+    parser.add_argument("output_file", type=str)
     parser.add_argument("--device", "-d", type=str)
     args = parser.parse_args()
 
@@ -48,4 +49,4 @@ if __name__ == "__main__":
     preds = test(test_loader)
     preds = pd.Series(preds)
     print(preds.head())
-    preds.to_csv("output/preds.test.csv")
+    preds.to_csv(args.output_file)

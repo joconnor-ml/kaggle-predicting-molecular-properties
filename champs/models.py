@@ -30,6 +30,42 @@ def reset(nn):
             _reset(nn)
 
 
+def attn_matrix(A, X, attn_weight):
+    # A : [batch, N, N]
+    # X : [batch, N, F']
+    # weight_attn : F'
+    num_atoms = int(X.get_shape()[1])
+    hidden_dim = int(X.get_shape()[2])
+
+    _X1 = tf.einsum('ij,ajk->aik', attn_weight, tf.transpose(X, [0,2,1]))
+    _X2 = tf.matmul(X, _X1)
+    _A = tf.multiply(A, _X2)
+    _A = tf.nn.tanh(_A)
+
+    return _A
+
+def graph_attn(A, X, weight, bias, attn):
+    dim = int(weight[0].get_shape()[1])
+    num_atoms = int(A.get_shape()[1])
+
+    X_total = []
+    A_total = []
+    for i in range( len(weight) ):
+        _b = tf.reshape( tf.tile( bias[i], [num_atoms] ), [num_atoms, dim] )
+        _h = tf.einsum('ijk,kl->ijl', X, weight[i]) + _b
+        _A = attn_matrix(A, _h, attn[i])
+        _h = tf.nn.relu(tf.matmul(_A, _h))
+        X_total.append(_h)
+        A_total.append(_A)
+
+    _X = tf.nn.relu(tf.reduce_mean(X_total, 0))
+    _A = tf.reduce_mean(A_total, 0)
+
+    _X = get_skip_connection(_X, X)
+
+    return _X, _A
+
+
 class GatedEdgeConv(MessagePassing):
     def __init__(self,
                  in_channels,

@@ -100,7 +100,7 @@ def train_subset(epoch, target_classes):
         optimizer.zero_grad()
         loss = mae(model(data), data.y, data.target_class, target_classes[0])
         for i in target_classes[1:]:
-            loss = mae(model(data), data.y, data.target_class, i)
+            loss += mae(model(data), data.y, data.target_class, i)
         loss.backward()
         loss_all += loss.item()
         optimizer.step()

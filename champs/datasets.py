@@ -99,7 +99,7 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
 
     @property
     def processed_file_names(self):
-        return ['champs.target_subset_{}.dataset'.format("_".join(self.target_classes))]
+        return ['champs.target_subset_{}.dataset'.format("_".join(str(c) for c in self.target_classes))]
 
     def download(self):
         pass

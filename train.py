@@ -98,7 +98,9 @@ def train_subset(epoch, target_classes):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = sum(mae(model(data), data.y, data.target_class, i) for i in target_classes)
+        loss = mae(model(data), data.y, data.target_class, target_classes[0])
+        for i in target_classes[1:]:
+            loss = mae(model(data), data.y, data.target_class, i)
         loss.backward()
         loss_all += loss.item()
         optimizer.step()

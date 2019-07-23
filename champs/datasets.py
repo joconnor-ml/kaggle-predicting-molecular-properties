@@ -88,9 +88,10 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
     csv_file = "/mnt/kaggle-predicting-molecular-properties/data/csv/train.csv"
     graph_dir = "/mnt/kaggle-predicting-molecular-properties/data/graphs/"
 
-    def __init__(self, root, transform=None, pre_transform=None, ):
+    def __init__(self, root, targets=None, transform=None, pre_transform=None):
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
+        self.targets = targets
 
     @property
     def raw_file_names(self):
@@ -132,6 +133,15 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
             edge_features = np.concatenate([edge_features,
                                             phi.reshape(-1, 1),
                                             theta.reshape(-1, 1)], axis=-1)
+
+            # drop unnecessary targets from: y, target_index, target_batch_index, target_class, target_weight
+
+            target_filter = target_indices.isin(self.targets)
+            y = y[target_filter]
+            target_index = target_index[target_filter]
+            target_batch_index = target_batch_index[target_filter]
+            target_class = target_class[target_filter]
+            target_weight = target_weight[target_filter]
 
             row = Data(
                 x=torch.from_numpy(atom_features).float(),
@@ -191,7 +201,6 @@ class ChampsTestDataset(ChampsDatasetMultiTarget):
             target_indices = np.load(os.path.join(self.graph_dir, "{}.target_indices.npy".format(molecule_name)))
             target_classes = np.load(os.path.join(self.graph_dir, "{}.target_class.npy".format(molecule_name)))
             target_weights = np.load(os.path.join(self.graph_dir, "{}.target_weight.npy".format(molecule_name)))
-
 
             dx = edge_features[:, -3]
             dy = edge_features[:, -2]

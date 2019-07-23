@@ -98,7 +98,7 @@ def train_subset(epoch, target_classes):
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        loss = mae(model(data), data.y, data.target_class)
+        loss = sum(mae(model(data), data.y, data.target_class, i) for i in target_classes)
         loss.backward()
         loss_all += loss.item()
         optimizer.step()
@@ -128,7 +128,7 @@ def test_one(loader, eval_class):
 best_val_error = None
 for epoch in range(1, 501):
     lr = scheduler.optimizer.param_groups[0]['lr']
-    loss = train(epoch)
+    loss = train_subset(epoch, target_classes=[0,1])
 
     # if 0:
     if epoch % 10 == 1:

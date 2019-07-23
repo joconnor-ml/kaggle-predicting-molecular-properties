@@ -140,11 +140,11 @@ for epoch in range(1, 501):
         print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation score: {:.7f}'.format(epoch, lr, loss, val_error))
         print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in range(8)]))
 
-        torch.save(model.state_dict(), './checkpoint/big_bondnet.{:04d}_model.pth'.format(epoch))
+        torch.save(model.state_dict(), './checkpoint/big_bondnet.1J.{:04d}_model.pth'.format(epoch))
         torch.save({
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,
             'val_loss': val_error,
-        }, './checkpoint/bondnet.{:04d}_optimizer.pth'.format(epoch))
+        }, './checkpoint/big_bondnet.1J.{:04d}_optimizer.pth'.format(epoch))
 
 print(mean, std)

@@ -89,9 +89,9 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
     graph_dir = "/mnt/kaggle-predicting-molecular-properties/data/graphs/"
 
     def __init__(self, root, targets=None, transform=None, pre_transform=None):
+        self.target_classes = targets
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
-        self.targets = targets
 
     @property
     def raw_file_names(self):
@@ -136,7 +136,7 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
 
             # drop unnecessary targets from: y, target_index, target_batch_index, target_class, target_weight
 
-            target_filter = np.isin(target_indices, self.targets)
+            target_filter = np.isin(target_indices, self.target_classes)
             y = y[target_filter]
             target_index = target_index[target_filter]
             target_batch_index = target_batch_index[target_filter]

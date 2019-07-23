@@ -25,13 +25,13 @@ dataset.data.y = (dataset.data.y - mean) / std
 train_dataset, val_dataset = torch.utils.data.random_split(dataset, [len(dataset)-10000, 10000])
 
 train_loader = DataLoader(
-    train_dataset, batch_size=64,
+    train_dataset, batch_size=128,
     num_workers=2,
     pin_memory=True,
     shuffle=True
 )
 val_loader = DataLoader(
-    val_dataset, batch_size=64,
+    val_dataset, batch_size=128,
     num_workers=2,
     pin_memory=True,
     shuffle=True

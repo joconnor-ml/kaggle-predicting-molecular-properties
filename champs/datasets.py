@@ -138,7 +138,7 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
 
             target_filter = np.isin(target_classes, self.target_class_subset)
             target_matrix = target_matrix[target_filter]
-            target_indices = target_indices[target_filter]
+            target_indices = target_indices[:, target_filter]
             targets = targets[target_filter]
             target_classes = target_classes[target_filter]
             target_weights = target_weights[target_filter]

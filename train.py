@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("..")
-from champs.datasets import ChampsDatasetMultiTarget
+from champs.datasets import ChampsDatasetTargetSubset
 from champs.models import Net
 from torch_geometric.data import DataLoader
 import torch
@@ -13,7 +13,7 @@ def main(target_classes):
 
     dim = 64
 
-    dataset = ChampsDatasetMultiTarget("./data/")
+    dataset = ChampsDatasetTargetSubset("./data/", targets=target_classes)
     # Normalize targets to mean = 0 and std = 1.
     sum = dataset.data.y.sum(dim=0)
     sum2 = (dataset.data.y ** 2).sum(dim=0)
@@ -99,11 +99,11 @@ def main(target_classes):
         if epoch % 10 == 1:
             val_error = test(val_loader)
             val_errors = [np.log(test_one(val_loader, i))
-                          for i in range(8)]
+                          for i in target_classes]
 
             scheduler.step(val_error)
             print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation score: {:.7f}'.format(epoch, lr, loss, val_error))
-            print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in range(8)]))
+            print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in target_classes]))
 
             torch.save(model.state_dict(), './checkpoint/big_bondnet.1J.{:04d}_model.pth'.format(epoch))
             torch.save({
@@ -114,12 +114,4 @@ def main(target_classes):
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('data_file', type=str)
-    parser.add_argument('structure_dir', type=str)
-    parser.add_argument('output_dir', type=str)
-    args = parser.parse_args()
-
-    main(args.data_file, args.structure_dir, args.output_dir)
+    main(target_classes=[0, 1])

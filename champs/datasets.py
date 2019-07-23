@@ -137,11 +137,11 @@ class ChampsDatasetTargetSubset(InMemoryDataset):  # todo, drop targets not in d
             # drop unnecessary targets from: y, target_index, target_batch_index, target_class, target_weight
 
             target_filter = np.isin(target_indices, self.target_classes)
-            y = y[target_filter]
-            target_index = target_index[target_filter]
-            target_batch_index = target_batch_index[target_filter]
-            target_class = target_class[target_filter]
-            target_weight = target_weight[target_filter]
+            target_matrix = target_matrix[target_filter]
+            target_indices = target_indices[target_filter]
+            targets = targets[target_filter]
+            target_classes = target_classes[target_filter]
+            target_weights = target_weights[target_filter]
 
             row = Data(
                 x=torch.from_numpy(atom_features).float(),

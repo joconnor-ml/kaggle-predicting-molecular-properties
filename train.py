@@ -56,7 +56,7 @@ def main(target_classes, initial_checkpoint, model_name):
         start_epoch = checkpoint['epoch']
         last_val_loss = checkpoint['val_loss']
         optimizer.load_state_dict(checkpoint['optimizer'])
-        print("Read model from {}. Resuming training from epoch {}. Last val loss = {:04d}".format(initial_checkpoint, start_epoch, last_val_loss))
+        print("Read model from {}. Resuming training from epoch {}. Last val loss = {:07f}".format(initial_checkpoint, start_epoch, last_val_loss))
 
     else:
         start_epoch = 0

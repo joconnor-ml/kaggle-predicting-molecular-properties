@@ -101,7 +101,9 @@ def main(target_classes, initial_checkpoint, model_name):
         initial_optimizer = initial_checkpoint.replace('_model.pth','_optimizer.pth')
         checkpoint  = torch.load(initial_optimizer)
         start_epoch = checkpoint['epoch']
+        last_val_loss = checkpoint['epoch']
         optimizer.load_state_dict(checkpoint['optimizer'])
+        print("Read model from {}. Resuming training from epoch {}. Last val loss = {:04d}".format(checkpoint, start_epoch, last_val_loss))
 
     for epoch in range(start_epoch, 501):
         lr = scheduler.optimizer.param_groups[0]['lr']
@@ -131,7 +133,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("model_name", type=str)
     parser.add_argument("-t", "--target-classes", nargs="+", type=int, default=None)
-    parser.add_argument("-c", "-checkpoint", type=str, default=None)
+    parser.add_argument("-c", "--checkpoint", type=str, default=None)
     args = parser.parse_args()
 
     main(target_classes=args.target_classes, initial_checkpoint=args.checkpoint,

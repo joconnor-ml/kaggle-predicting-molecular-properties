@@ -34,7 +34,8 @@ class ChampsDatasetMultiTarget(InMemoryDataset):
 
         data_list = []
         for i, molecule_name in enumerate(id):
-            if i % 10000 == 0: print(i)
+            if i % 10000 == 0:
+                print(i)
             edge_array = np.load(os.path.join(self.graph_dir, "{}.edge_array.npy".format(molecule_name)))
             edge_features = np.load(os.path.join(self.graph_dir, "{}.edge_features.npy".format(molecule_name)))
             atom_features = np.load(os.path.join(self.graph_dir, "{}.atom_features.npy".format(molecule_name)))

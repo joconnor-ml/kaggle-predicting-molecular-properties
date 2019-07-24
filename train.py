@@ -8,7 +8,56 @@ import torch
 import numpy as np
 
 
-def main(target_classes):
+def mae(predict, truth, target_class, eval_class=None):
+    y = torch.gather(truth, 1, target_class.view(-1, 1)).squeeze(-1)
+    predict = predict.view(-1)
+    y = y.view(-1)
+
+    score = torch.abs(predict - y)
+    if eval_class is not None:
+        score = score[target_class == eval_class] * std[eval_class]
+    score = score.mean()
+    return score
+
+
+def train_subset(model, optimizer, loader, device, epoch, target_classes):
+    model.train()
+    loss_all = 0
+
+    for data in loader:
+        data = data.to(device)
+        optimizer.zero_grad()
+        preds = model(data)
+        loss = mae(preds, data.y, data.target_class, target_classes[0])
+        for i in target_classes[1:]:
+            loss += mae(preds, data.y, data.target_class, i)
+        loss.backward()
+        loss_all += loss.item()
+        optimizer.step()
+    return loss_all / len(loader)  # divide by number of batches
+
+
+def test(model, loader, device):
+    model.eval()
+    error = 0
+
+    for data in loader:
+        data = data.to(device)
+        error += mae(model(data), data.y, data.target_class).item()
+    return error / len(loader)  # divide by number of batches
+
+
+def test_one(model, loader, eval_class, device):
+    model.eval()
+    error = 0
+
+    for data in loader:
+        data = data.to(device)
+        error += mae(model(data), data.y, data.target_class, eval_class=eval_class).item()
+    return error / len(loader)  # divide by number of batches
+
+
+def main(target_classes, initial_checkpoint):
     torch.manual_seed(0)  # for reproducabibilites
 
     dim = 64
@@ -45,60 +94,23 @@ def main(target_classes):
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)
 
-    def mae(predict, truth, target_class, eval_class=None):
-        y = torch.gather(truth, 1, target_class.view(-1, 1)).squeeze(-1)
-        predict = predict.view(-1)
-        y = y.view(-1)
+    if initial_checkpoint is not None:
+        checkpoint = torch.load(initial_checkpoint, map_location=device)
+        model.load_state_dict(checkpoint)
 
-        score = torch.abs(predict - y)
-        if eval_class is not None:
-            score = score[target_class == eval_class] * std[eval_class]
-        score = score.mean()
-        return score
+        initial_optimizer = initial_checkpoint.replace('_model.pth','_optimizer.pth')
+        checkpoint  = torch.load(initial_optimizer)
+        start_epoch = checkpoint['epoch']
+        optimizer.load_state_dict(checkpoint['optimizer'])
 
-    def train_subset(epoch, target_classes):
-        # TODO -- train one model each for 1J, 2J and 3J couplings -- the underlying interactions appear quite different (especially 1J)
-        model.train()
-        loss_all = 0
-
-        for data in train_loader:
-            data = data.to(device)
-            optimizer.zero_grad()
-            preds = model(data)
-            loss = mae(preds, data.y, data.target_class, target_classes[0])
-            for i in target_classes[1:]:
-                loss += mae(preds, data.y, data.target_class, i)
-            loss.backward()
-            loss_all += loss.item()
-            optimizer.step()
-        return loss_all / len(train_loader)  # divide by number of batches
-
-    def test(loader):
-        model.eval()
-        error = 0
-
-        for data in loader:
-            data = data.to(device)
-            error += mae(model(data), data.y, data.target_class).item()
-        return error / len(loader)  # divide by number of batches
-
-    def test_one(loader, eval_class):
-        model.eval()
-        error = 0
-
-        for data in loader:
-            data = data.to(device)
-            error += mae(model(data), data.y, data.target_class, eval_class=eval_class).item()
-        return error / len(loader)  # divide by number of batches
-
-    for epoch in range(1, 501):
+    for epoch in range(start_epoch, 501):
         lr = scheduler.optimizer.param_groups[0]['lr']
-        loss = train_subset(epoch, target_classes)
+        loss = train_subset(model, optimizer, train_loader, device, epoch, target_classes)
 
         # if 0:
         if epoch % 10 == 1:
-            val_error = test(val_loader)
-            val_errors = [np.log(test_one(val_loader, i))
+            val_error = test(model, val_loader, device)
+            val_errors = [np.log(test_one(model, val_loader, i, device))
                           for i in target_classes]
 
             scheduler.step(val_error)
@@ -114,4 +126,11 @@ def main(target_classes):
 
 
 if __name__ == "__main__":
-    main(target_classes=[0, 1])
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--target-classes", nargs="+", type=int, default=None)
+    parser.add_argument("-c", "-checkpoint", type=str, default=None)
+    args = parser.parse_args()
+
+    main(target_classes=args.target_classes, initial_checkpoint=args.checkpoint)

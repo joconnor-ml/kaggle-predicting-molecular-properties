@@ -85,8 +85,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("model_name", type=str)
-    parser.add_argument("-t", "--target-classes", nargs="+", type=int, default=None)
-    parser.add_argument("-c", "--checkpoint", type=str, default=None)
+    parser.add_argument("--target-classes", "-t", nargs="+", type=int, default=None)
+    parser.add_argument("--checkpoint", "-c", type=str, default=None)
     args = parser.parse_args()
 
     main(target_classes=args.target_classes, initial_checkpoint=args.checkpoint,

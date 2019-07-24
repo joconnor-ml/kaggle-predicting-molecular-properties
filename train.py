@@ -60,12 +60,12 @@ def main(target_classes, initial_checkpoint, model_name):
 
     for epoch in range(start_epoch, 501):
         lr = scheduler.optimizer.param_groups[0]['lr']
-        loss = train_subset(model, optimizer, train_loader, device, epoch, target_classes)
+        loss = train_subset(model, optimizer, train_loader, device, epoch, target_classes, std)
 
         # if 0:
         if epoch % 10 == 1:
-            val_error = test(model, val_loader, device)
-            val_errors = [np.log(test_one(model, val_loader, i, device))
+            val_error = test(model, val_loader, device, std)
+            val_errors = [np.log(test_one(model, val_loader, i, device, std))
                           for i in target_classes]
 
             scheduler.step(val_error)

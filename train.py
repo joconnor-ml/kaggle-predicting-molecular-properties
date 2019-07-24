@@ -57,7 +57,7 @@ def test_one(model, loader, eval_class, device):
     return error / len(loader)  # divide by number of batches
 
 
-def main(target_classes, initial_checkpoint):
+def main(target_classes, initial_checkpoint, model_name):
     torch.manual_seed(0)  # for reproducabibilites
 
     dim = 64
@@ -117,20 +117,22 @@ def main(target_classes, initial_checkpoint):
             print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation score: {:.7f}'.format(epoch, lr, loss, val_error))
             print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in target_classes]))
 
-            torch.save(model.state_dict(), './checkpoint/big_bondnet.1J.{:04d}_model.pth'.format(epoch))
+            torch.save(model.state_dict(), './checkpoint/{}.{:04d}_model.pth'.format(model_name, epoch))
             torch.save({
                 'optimizer': optimizer.state_dict(),
                 'epoch': epoch,
                 'val_loss': val_error,
-            }, './checkpoint/big_bondnet.1J.{:04d}_optimizer.pth'.format(epoch))
+            }, './checkpoint/{}.{:04d}_optimizer.pth'.format(model_name, epoch))
 
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("model_name", type=str)
     parser.add_argument("-t", "--target-classes", nargs="+", type=int, default=None)
     parser.add_argument("-c", "-checkpoint", type=str, default=None)
     args = parser.parse_args()
 
-    main(target_classes=args.target_classes, initial_checkpoint=args.checkpoint)
+    main(target_classes=args.target_classes, initial_checkpoint=args.checkpoint,
+         model_name=args.model_name)

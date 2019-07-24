@@ -54,9 +54,12 @@ def main(target_classes, initial_checkpoint, model_name):
         initial_optimizer = initial_checkpoint.replace('_model.pth','_optimizer.pth')
         checkpoint  = torch.load(initial_optimizer)
         start_epoch = checkpoint['epoch']
-        last_val_loss = checkpoint['epoch']
+        last_val_loss = checkpoint['val_loss']
         optimizer.load_state_dict(checkpoint['optimizer'])
         print("Read model from {}. Resuming training from epoch {}. Last val loss = {:04d}".format(checkpoint, start_epoch, last_val_loss))
+
+    else:
+        start_epoch = 0
 
     for epoch in range(start_epoch, 501):
         lr = scheduler.optimizer.param_groups[0]['lr']

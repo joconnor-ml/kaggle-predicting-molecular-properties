@@ -24,7 +24,7 @@ def reset(nn):
             _reset(nn)
 
 
-class MultiHeadAttention(nn.Module):
+class MultiHeadAttention(torch.nn.Module):
     def __init__(self, heads, d_model, dropout=0.1):
         super().__init__()
 

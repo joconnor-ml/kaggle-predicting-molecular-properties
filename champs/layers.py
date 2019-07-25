@@ -32,11 +32,11 @@ class MultiHeadAttention(torch.nn.Module):
         self.d_k = d_model // heads
         self.h = heads
 
-        self.q_linear = nn.Linear(d_model, d_model)
-        self.v_linear = nn.Linear(d_model, d_model)
-        self.k_linear = nn.Linear(d_model, d_model)
-        self.dropout = nn.Dropout(dropout)
-        self.out = nn.Linear(d_model, d_model)
+        self.q_linear = Linear(d_model, d_model)
+        self.v_linear = Linear(d_model, d_model)
+        self.k_linear = Linear(d_model, d_model)
+        self.dropout = Dropout(dropout)
+        self.out = Linear(d_model, d_model)
 
     def forward(self, q, k, v, mask=None):
         bs = q.size(0)

@@ -24,6 +24,45 @@ def reset(nn):
             _reset(nn)
 
 
+class MultiHeadAttention(nn.Module):
+    def __init__(self, heads, d_model, dropout=0.1):
+        super().__init__()
+
+        self.d_model = d_model
+        self.d_k = d_model // heads
+        self.h = heads
+
+        self.q_linear = nn.Linear(d_model, d_model)
+        self.v_linear = nn.Linear(d_model, d_model)
+        self.k_linear = nn.Linear(d_model, d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.out = nn.Linear(d_model, d_model)
+
+    def forward(self, q, k, v, mask=None):
+        bs = q.size(0)
+
+        # perform linear operation and split into h heads
+
+        k = self.k_linear(k).view(bs, -1, self.h, self.d_k)
+        q = self.q_linear(q).view(bs, -1, self.h, self.d_k)
+        v = self.v_linear(v).view(bs, -1, self.h, self.d_k)
+
+        # transpose to get dimensions bs * h * sl * d_model
+
+        k = k.transpose(1, 2)
+        q = q.transpose(1, 2)
+        v = v.transpose(1, 2)
+        # calculate attention using function we will define next
+        scores = attention(q, k, v, self.d_k, mask, self.dropout)
+
+        # concatenate heads and put through final linear layer
+        concat = scores.transpose(1, 2).contiguous() \
+            .view(bs, -1, self.d_model)
+
+        output = self.out(concat)
+
+        return output
+
 def attn_matrix(A, X, attn_weight):
     # A : [batch, N, N]
     # X : [batch, N, F']
@@ -38,26 +77,27 @@ def attn_matrix(A, X, attn_weight):
 
     return _A
 
-def graph_attn(A, X, weight, bias, attn):
+def graph_attn(adjacency_matrix, node_features, weight, bias, attn):
     dim = int(weight[0].get_shape()[1])
-    num_atoms = int(A.get_shape()[1])
+    num_atoms = int(adjacency_matrix.get_shape()[1])
 
-    X_total = []
-    A_total = []
+    node_features_total = []
+    adjacency_total = []
+
     for i in range( len(weight) ):
         _b = tf.reshape( tf.tile( bias[i], [num_atoms] ), [num_atoms, dim] )
-        _h = tf.einsum('ijk,kl->ijl', X, weight[i]) + _b
-        _A = attn_matrix(A, _h, attn[i])
-        _h = tf.nn.relu(tf.matmul(_A, _h))
-        X_total.append(_h)
-        A_total.append(_A)
+        _h = tf.einsum('ijk,kl->ijl', node_features, weight[i]) + _b
+        _adjacency_matrix = attn_matrix(adjacency_matrix, _h, attn[i])
+        _h = tf.nn.relu(tf.matmul(_adjacency_matrix, _h))
+        node_features_total.append(_h)
+        adjacency_total.append(_adjacency_matrix)
 
-    _X = tf.nn.relu(tf.reduce_mean(X_total, 0))
-    _A = tf.reduce_mean(A_total, 0)
+    _node_features = tf.nn.relu(tf.reduce_mean(node_features_total, 0))
+    _adjacency_matrix = tf.reduce_mean(adjacency_total, 0)
 
-    _X = get_skip_connection(_X, X)
+    _node_features = get_skip_connection(_node_features, node_features)
 
-    return _X, _A
+    return _node_features, _adjacency_matrix
 
 
 class GatedEdgeConv(MessagePassing):
@@ -111,6 +151,11 @@ class GatedEdgeConv(MessagePassing):
         # from NNConv:
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
         x_j1 = torch.matmul(x_j.unsqueeze(1), weight).squeeze(1)
+
+        # what kind of attention makes sense here?
+        # we are updating the representation of atom j with contributions from its neighbours.
+
+
         # now add gated skip connection:
         return self.gated_skip_connection(x_j, x_j1)
 

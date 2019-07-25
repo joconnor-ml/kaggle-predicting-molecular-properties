@@ -73,7 +73,7 @@ def main(target_classes, initial_checkpoint, model_name):
 
             scheduler.step(val_error)
             print('Epoch: {:03d}, LR: {:7f}, Loss: {:.7f}, Validation score: {:.7f}'.format(epoch, lr, loss, val_error))
-            print(", ".join(["target {}: {:.5f}".format(i, val_errors[i]) for i in target_classes]))
+            print(", ".join(["target {}: {:.5f}".format(i, val_errors[j]) for j, i in enumerate(target_classes)]))
 
             torch.save(model.state_dict(), './checkpoint/{}.{:04d}_model.pth'.format(model_name, epoch))
             torch.save({

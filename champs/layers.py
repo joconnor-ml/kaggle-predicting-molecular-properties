@@ -79,7 +79,6 @@ class GatedEdgeConv(MessagePassing):
         # what kind of attention makes sense here?
         # we are updating the representation of atom j with contributions from its neighbours.
 
-
         # now add gated skip connection:
         return self.gated_skip_connection(x_j, x_j1)
 
@@ -144,8 +143,9 @@ class GATEdgeConv(MessagePassing):
     def message(self, x_j, pseudo):
         # from NNConv:
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
+        weight = self.attn(weight, weight, weight)  # self-attention
+
         x_j1 = torch.matmul(x_j.unsqueeze(1), weight).squeeze(1)
-        x_j1 = self.attn(x_j1, x_j1, x_j1)  # self-attention
         # now add gated skip connection:
         return self.gated_skip_connection(x_j, x_j1)
 

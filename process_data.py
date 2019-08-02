@@ -142,6 +142,17 @@ def structure_to_graph(structure_file):
     return edge_array, edge_features, atom_features, smile, xyz.values
 
 
+def get_path(atom0, atom1, edge_array, max_depth=3):
+    """TODO: too confusing"""
+    nodes = [atom0]
+    for i in range(max_depth):
+        # get shortest path from atom 0 to atom 1
+        possible_hops = [edge_array[edge_array[:,0] == node] for node in nodes]
+
+
+    return
+
+
 def process_multiple(data_file, structure_dir, output_dir, test=False):
     train = pd.read_csv(data_file)
     class_counts = train.groupby("type")["id"].count()
@@ -154,6 +165,10 @@ def process_multiple(data_file, structure_dir, output_dir, test=False):
     grps = train.groupby("molecule_name")
     target_indices = [grps.get_group(molecule_name)[["atom_index_0", "atom_index_1"]].values.T
                       for molecule_name in molecule_names]
+
+    target_paths = [get_paths(grps.get_group(molecule_name))  # TODO
+                    for molecule_name in molecule_names]
+
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     results = pool.map(structure_to_graph, structure_files)
 

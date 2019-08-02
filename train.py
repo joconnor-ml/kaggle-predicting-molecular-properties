@@ -45,7 +45,7 @@ def main(target_classes, initial_checkpoint, model_name):
     model = Net(dataset.num_features, dataset[0].edge_attr.shape[-1], dim, processing_steps=3).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)
+        optimizer, mode='min', factor=0.7, patience=5, min_lr=0.00001)  # TODO: try out cyclical learning rates?
 
     if initial_checkpoint is not None:
         checkpoint = torch.load(initial_checkpoint, map_location=device)

@@ -166,9 +166,6 @@ def process_multiple(data_file, structure_dir, output_dir, test=False):
     target_indices = [grps.get_group(molecule_name)[["atom_index_0", "atom_index_1"]].values.T
                       for molecule_name in molecule_names]
 
-    target_paths = [get_paths(grps.get_group(molecule_name))  # TODO
-                    for molecule_name in molecule_names]
-
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     results = pool.map(structure_to_graph, structure_files)
 

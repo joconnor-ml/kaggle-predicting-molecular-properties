@@ -141,6 +141,8 @@ class GATEdgeConv(MessagePassing):
         return x0 * coeff + x1 * (1.0 - coeff)
 
     def message(self, x_j, pseudo):
+        print(pseudo.size())
+        print(x_j.size())
         # from NNConv:
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
         x_j1 = torch.matmul(x_j.unsqueeze(1), weight)

@@ -9,7 +9,7 @@ def main(qm_dir, train_file, test_file):
     train = pd.read_csv(train_file)
     test = pd.read_csv(test_file)
 
-    both = pd.concat([train, test], axis=0, sort=False)
+    both = pd.concat([train, test], axis=0)
     both = both.set_index('molecule_name', drop=False)
 
     both.sort_index(inplace=True)

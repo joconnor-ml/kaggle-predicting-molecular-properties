@@ -15,9 +15,8 @@ def main(qm_dir, train_file, test_file):
     both.sort_index(inplace=True)
 
 
-    def processQM9_file(filename):
-        path = PATH_QM9 / filename
-        molecule_name = filename[:-4]
+    def processQM9_file(path):
+        molecule_name = path.split("/")[-1][:-4]
 
         row_count = sum(1 for row in csv.reader(open(path)))
         na = row_count - 5

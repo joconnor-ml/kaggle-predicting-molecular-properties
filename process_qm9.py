@@ -20,25 +20,25 @@ def main(qm_dir, train_file, test_file):
         path = PATH_QM9 / filename
         molecule_name = filename[:-4]
 
-        row_count = sum(1 for row in csv.reader(open(path)))
-        na = row_count - 5
-        freqs = pd.read_csv(path, sep=' |\t', engine='python', skiprows=row_count - 3, nrows=1, header=None)
-        sz = freqs.shape[1]
-        is_linear = np.nan
-        if 3 * na - 5 == sz:
-            is_linear = False
-        elif 3 * na - 6 == sz:
-            is_linear = True
+        #row_count = sum(1 for row in csv.reader(open(path)))
+        #na = row_count - 5
+        #freqs = pd.read_csv(path, sep=' |\t', engine='python', skiprows=row_count - 3, nrows=1, header=None)
+        #sz = freqs.shape[1]
+        #is_linear = np.nan
+        #if 3 * na - 5 == sz:
+        #    is_linear = False
+        #elif 3 * na - 6 == sz:
+        #    is_linear = True
 
         stats = pd.read_csv(path, sep=' |\t', engine='python', skiprows=1, nrows=1, header=None)
         stats = stats.loc[:, 2:]
         stats.columns = ['rc_A', 'rc_B', 'rc_C', 'mu', 'alpha', 'homo', 'lumo', 'gap', 'r2', 'zpve', 'U0', 'U', 'H', 'G',
                          'Cv']
 
-        stats['freqs_min'] = freqs.values[0].min()
-        stats['freqs_max'] = freqs.values[0].max()
-        stats['freqs_mean'] = freqs.values[0].mean()
-        stats['linear'] = is_linear
+        #stats['freqs_min'] = freqs.values[0].min()
+        #stats['freqs_max'] = freqs.values[0].max()
+        #stats['freqs_mean'] = freqs.values[0].mean()
+        #stats['linear'] = is_linear
 
         mm = pd.read_csv(path, sep='\t', engine='python', skiprows=2, skipfooter=3, names=range(5))[4]
         if mm.dtype == 'O':

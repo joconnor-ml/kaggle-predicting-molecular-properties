@@ -143,8 +143,9 @@ class GATEdgeConv(MessagePassing):
     def message(self, x_j, pseudo):
         # from NNConv:
         weight = self.nn(pseudo).view(-1, self.in_channels, self.out_channels)
-        x_j1 = torch.matmul(x_j.unsqueeze(1), weight)#.squeeze(1)
-        print(x_j1.size())
+        x_j1 = torch.matmul(x_j.unsqueeze(1), weight)
+        x_j1 = self.attn(x_j1, x_j1, x_j1).squeeze(1)  # self-attention
+
         # now add gated skip connection:
         return self.gated_skip_connection(x_j, x_j1)
 

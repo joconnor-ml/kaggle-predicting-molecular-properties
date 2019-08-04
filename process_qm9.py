@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import csv
 
-def main(qm_dir, train_file, test_file):
+def main(qm_dir, structure_dir, train_file, test_file):
     PATH_QM9 = Path(qm_dir)
     train = pd.read_csv(train_file)
     test = pd.read_csv(test_file)
@@ -32,7 +32,10 @@ def main(qm_dir, train_file, test_file):
 
         stats = pd.read_csv(path, sep=' |\t', engine='python', skiprows=1, nrows=1, header=None)
         stats = stats.loc[:, 2:]
-        stats.columns = ['rc_A', 'rc_B', 'rc_C', 'mu', 'alpha', 'homo', 'lumo', 'gap', 'r2', 'zpve', 'U0', 'U', 'H', 'G',
+        stats.columns = ['rc_A', 'rc_B', 'rc_C',
+                         'mu', 'alpha', 'homo', 'lumo',
+                         'gap', 'r2', 'zpve',
+                         'U0', 'U', 'H', 'G',
                          'Cv']
 
         #stats['freqs_min'] = freqs.values[0].min()
@@ -62,17 +65,19 @@ def main(qm_dir, train_file, test_file):
             df = pd.concat([df, stats], axis=0)
         return df
 
-    all_files = os.listdir(qm_dir)
+    all_files = os.listdir(structure_dir)
     df = processQM9_list(all_files)
     df.to_hdf("qm9.hdf", "data")
+
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument('qm_dir',  type=str)
+    parser.add_argument('structure_dir',  type=str)
     parser.add_argument('train_file',  type=str)
     parser.add_argument('test_file',  type=str)
     args = parser.parse_args()
 
-    main(args.qm_dir, args.train_file, args.test_file)
+    main(args.qm_dir, args.structure_dir, args.train_file, args.test_file)
